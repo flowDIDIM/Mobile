@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "DIDIM-Mobile",
-    "slug": "DIDIM-Mobile",
+    "name": "DIDIM",
+    "slug": "DIDIM",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "didimmobile",
+    "scheme": "didim",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -38,7 +38,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
