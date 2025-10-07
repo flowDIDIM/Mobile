@@ -1,6 +1,8 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import { Config } from "tailwindcss";
+
+export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
@@ -27,6 +29,9 @@ module.exports = {
           950: "#121316",
           1000: "#000000",
         },
+
+        backgroundGradientStart: "#17191C",
+        backgroundGradientEnd: "rgba(28, 34, 45, 0.8)",
       },
 
       fontSize: {
@@ -56,4 +61,4 @@ module.exports = {
     },
   },
   plugins: [],
-};
+} as const satisfies Config;
