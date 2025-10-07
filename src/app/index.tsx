@@ -1,5 +1,9 @@
-import { Redirect } from 'expo-router';
+import { Text, View } from "react-native";
 
 export default function Index() {
-  return <Redirect href="/splash" />;
+  return (
+    <View className="flex-1 justify-center items-center">
+      <Text className="text-5xl font-bold text-blue-500">Hello World!</Text>
+    </View>
+  );
 }
