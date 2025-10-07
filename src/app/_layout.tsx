@@ -1,6 +1,26 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { LinearGradient } from "expo-linear-gradient";
 import "./global.css";
+import { colors } from "@/design-system";
 
 export default function RootLayout() {
-  return <Stack />;
+  return (
+    <>
+      <StatusBar style="light" translucent backgroundColor="transparent" />
+      <LinearGradient
+        colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
+        locations={[0.37, 1]}
+        style={{ flex: 1 }}
+      >
+        <Stack
+          screenOptions={{
+            // headerShown: false,
+            headerTransparent: true,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
+      </LinearGradient>
+    </>
+  );
 }

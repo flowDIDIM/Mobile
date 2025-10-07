@@ -9,7 +9,7 @@ module.exports = defineConfig([
   {
     ignores: ["dist/*"],
     rules: {
-      "import/extensions": false,
+      "import/extensions": "off",
     },
   },
 ]);
