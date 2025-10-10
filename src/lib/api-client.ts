@@ -1,8 +1,9 @@
 import axios from "axios";
 import { authClient } from "./auth-client";
+import { env } from "@/env";
 
 const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: env.EXPO_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
