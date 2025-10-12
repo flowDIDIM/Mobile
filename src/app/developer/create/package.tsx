@@ -1,85 +1,64 @@
 import React, { useCallback } from "react";
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
+import { z } from "zod";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import BottomSheet, {
-  BottomSheetView,
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { client } from "@/lib/api-client";
+import { clientQuery } from "@/lib/api-client";
+
+const packageSchema = z.object({
+  packageName: z
+    .string()
+    .min(1, "패키지명을 입력해주세요")
+    .regex(
+      /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/,
+      "올바른 Android 패키지명 형식이 아닙니다 (예: com.company.app)",
+    ),
+});
 
 export default function CreatePackage() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const bottomSheetRef = React.useRef<BottomSheet>(null);
 
-  const validatePackageMutation = useMutation({
-    mutationFn: async (packageName: string) => {
-      const response = await client.developer.validate.package.$post({
-        json: { packageName },
-      });
-
-      if (!response.ok) {
-        throw new Error("Package validation failed");
-      }
-
-      return response.json();
-    },
-    onSuccess: (data, packageName) => {
-      // Navigate to next page with track data
-      router.push({
-        pathname: "/developer/create/track",
-        params: {
-          packageName,
-          tracks: JSON.stringify(data.tracks),
-        },
-      });
-    },
-    onError: () => {
-      bottomSheetRef.current?.expand();
-    },
-  });
+  const { isPending, mutate } = useMutation(
+    clientQuery.developer.validate.package.$post.mutationOptions({
+      onSuccess: (data, input) => {
+        // Navigate to next page with track data
+        router.push({
+          pathname: "/developer/create/track",
+          params: {
+            packageName: input.json.packageName,
+            tracks: JSON.stringify(data.tracks),
+          },
+        });
+      },
+      onError: () => {
+        bottomSheetRef.current?.expand();
+      },
+    }),
+  );
 
   const form = useForm({
     defaultValues: {
       packageName: "",
     },
     validators: {
-      onChange: ({ value }) => {
-        // Android package name validation
-        const trimmedValue = value.packageName.trim();
-
-        if (!trimmedValue) {
-          return {
-            form: "패키지명을 입력해주세요",
-            fields: {
-              packageName: "패키지명을 입력해주세요",
-            },
-          };
-        }
-
-        const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
-        if (!packageRegex.test(trimmedValue)) {
-          return {
-            form: "올바른 Android 패키지명 형식이 아닙니다",
-            fields: {
-              packageName:
-                "올바른 Android 패키지명 형식이 아닙니다 (예: com.company.app)",
-            },
-          };
-        }
-
-        return undefined;
-      },
+      onChange: packageSchema,
     },
     onSubmit: async ({ value }) => {
-      validatePackageMutation.mutate(value.packageName.trim());
+      mutate({
+        json: { packageName: value.packageName.trim() },
+      });
     },
   });
 
@@ -115,14 +94,14 @@ export default function CreatePackage() {
                   placeholder="ex)com.didim.~"
                   value={field.state.value}
                   onChangeText={field.handleChange}
-                  editable={!validatePackageMutation.isPending}
+                  editable={!isPending}
                   variant={
                     field.state.meta.errors.length > 0 ? "error" : "default"
                   }
                 />
-                {field.state.meta.errors.length > 0 && (
+                {field.state.meta.errors[0] && (
                   <Text className="text-error text-desc-1 mt-1">
-                    {field.state.meta.errors[0]}
+                    {field.state.meta.errors[0].message}
                   </Text>
                 )}
               </>
@@ -147,11 +126,11 @@ export default function CreatePackage() {
           {({ canSubmit, isSubmitting }) => (
             <Button
               variant="standard"
-              disabled={!canSubmit || validatePackageMutation.isPending}
+              disabled={!canSubmit || isPending}
               onPress={form.handleSubmit}
               className="bg-primary"
             >
-              {validatePackageMutation.isPending ? "확인 중..." : "다음"}
+              {isPending ? "확인 중..." : "다음"}
             </Button>
           )}
         </form.Subscribe>

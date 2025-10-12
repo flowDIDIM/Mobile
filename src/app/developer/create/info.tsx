@@ -4,109 +4,81 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import * as ImagePicker from "expo-image-picker";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import { Upload, Plus } from "lucide-react-native";
-import { client } from "@/lib/api-client";
+import { clientQuery } from "@/lib/api-client";
 
 const PAYMENT_PRESETS = [10000, 30000, 50000];
 
+const infoSchema = z.object({
+  shortDescription: z.string().min(1, "한 줄 소개를 입력해주세요"),
+  icon: z.string().min(1, "아이콘을 선택해주세요"),
+  storeImages: z
+    .array(z.string())
+    .min(1, "상점 이미지를 최소 1개 이상 선택해주세요"),
+  detailedDescription: z.string().min(1, "상세 설명을 입력해주세요"),
+  paymentAmount: z
+    .string()
+    .min(1, "결제 금액을 입력해주세요")
+    .refine((val) => parseInt(val) >= 10000, {
+      message: "결제 금액은 최소 10,000원 이상이어야 합니다",
+    }),
+});
+
 export default function CreateInfo() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const params = useLocalSearchParams<{
     packageName: string;
     trackId: string;
   }>();
 
   // Fetch app info from server
-  const { data: appInfo, isLoading } = useQuery({
-    queryKey: ["appInfo", params.packageName, params.trackId],
-    queryFn: async () => {
-      const response = await client.developer.validate.app.$post({
+  const { data: appInfo, isLoading } = useQuery(
+    clientQuery.developer.validate.app.$post.queryOptions({
+      input: {
         json: {
           packageName: params.packageName,
           trackId: params.trackId,
         },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch app info");
-      }
-
-      return response.json();
-    },
-    enabled: !!params.packageName && !!params.trackId,
-  });
+      },
+      enabled: !!params.packageName && !!params.trackId,
+    }),
+  );
 
   const form = useForm({
     defaultValues: {
-      shortDescription: "",
-      storeImages: [] as string[],
-      icon: "",
-      detailedDescription: "",
+      shortDescription: appInfo?.shortDescription || "",
+      storeImages: (appInfo?.storeImages || []) as string[],
+      icon: appInfo?.icon || "",
+      detailedDescription: appInfo?.detailedDescription || "",
       paymentAmount: "",
     },
     validators: {
-      onChange: ({ value }) => {
-        const fieldErrors: Record<string, string> = {};
-
-        // 1. 한 줄 소개 검증
-        if (!value.shortDescription.trim()) {
-          fieldErrors.shortDescription = "한 줄 소개를 입력해주세요";
-        }
-
-        // 2. 아이콘 검증
-        if (!value.icon) {
-          fieldErrors.icon = "아이콘을 선택해주세요";
-        }
-
-        // 3. 상점 이미지 검증
-        if (!value.storeImages[0]) {
-          fieldErrors.storeImages = "상점 이미지를 최소 1개 이상 선택해주세요";
-        }
-
-        // 4. 상세 설명 검증
-        if (!value.detailedDescription.trim()) {
-          fieldErrors.detailedDescription = "상세 설명을 입력해주세요";
-        }
-
-        // 5. 결제 금액 검증
-        const amount = parseInt(value.paymentAmount || "0");
-        if (!value.paymentAmount || amount < 10000) {
-          fieldErrors.paymentAmount =
-            "결제 금액은 최소 10,000원 이상이어야 합니다";
-        }
-
-        // Return errors if any exist
-        if (Object.keys(fieldErrors).length > 0) {
-          return {
-            form: "모든 필수 항목을 입력해주세요",
-            fields: fieldErrors,
-          };
-        }
-
-        return undefined;
-      },
+      onChange: infoSchema,
     },
     onSubmit: async ({ value }) => {
       // TODO: Submit form data to API
       console.log("Form submitted:", value);
 
       // Navigate to payment page
-      router.push("/developer/create/payment");
     },
   });
 
-  // Update form values when appInfo is loaded
+  // Reset form with server data when appInfo is loaded
   useEffect(() => {
     if (appInfo) {
-      form.setFieldValue("shortDescription", appInfo.shortDescription);
-      form.setFieldValue("storeImages", appInfo.storeImages || []);
-      form.setFieldValue("icon", appInfo.icon || "");
-      form.setFieldValue("detailedDescription", appInfo.detailedDescription);
+      form.reset({
+        shortDescription: appInfo.shortDescription,
+        storeImages: appInfo.storeImages || [],
+        icon: appInfo.icon || "",
+        detailedDescription: appInfo.detailedDescription,
+        paymentAmount: "",
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appInfo]);
 
   const pickStoreImage = async (index: number) => {
@@ -177,7 +149,7 @@ export default function CreateInfo() {
                 />
                 {field.state.meta.errors.length > 0 && (
                   <Text className="text-error text-desc-1 mt-1">
-                    {field.state.meta.errors[0]}
+                    {field.state.meta.errors[0].message}
                   </Text>
                 )}
               </>
@@ -214,7 +186,7 @@ export default function CreateInfo() {
                     </Pressable>
                     {field.state.meta.errors.length > 0 && (
                       <Text className="text-error text-desc-1 mt-1">
-                        {field.state.meta.errors[0]}
+                        {field.state.meta.errors[0].message}
                       </Text>
                     )}
                   </>
@@ -264,7 +236,7 @@ export default function CreateInfo() {
                     </View>
                     {field.state.meta.errors.length > 0 && (
                       <Text className="text-error text-desc-1 mt-1">
-                        {field.state.meta.errors[0]}
+                        {field.state.meta.errors[0].message}
                       </Text>
                     )}
                   </>
@@ -288,7 +260,7 @@ export default function CreateInfo() {
                   }`}
                 >
                   <TextInput
-                    className="text-desc-1 text-sub flex-1"
+                    className="text-desc-1 text-main flex-1"
                     placeholder="테스터들에게 서비스를 자세히 설명해 주세요"
                     placeholderTextColor="#919DA1"
                     value={field.state.value}
@@ -303,7 +275,7 @@ export default function CreateInfo() {
                 </View>
                 {field.state.meta.errors.length > 0 && (
                   <Text className="text-error text-desc-1 mt-1">
-                    {field.state.meta.errors[0]}
+                    {field.state.meta.errors[0].message}
                   </Text>
                 )}
               </>
@@ -352,7 +324,7 @@ export default function CreateInfo() {
                 </View>
                 {field.state.meta.errors.length > 0 && (
                   <Text className="text-error text-desc-1 mt-1">
-                    {field.state.meta.errors[0]}
+                    {field.state.meta.errors[0].message}
                   </Text>
                 )}
               </>
@@ -379,13 +351,12 @@ export default function CreateInfo() {
           >
             {({ paymentAmount }) => {
               const amount = parseInt(paymentAmount || "0", 10);
-              const finalAmount = amount + 2000;
 
               return (
                 <View className="bg-white/[0.04] border border-white/[0.08] rounded h-11 px-3 flex-row items-center justify-between">
                   <Text className="text-desc-1 text-sub">최종 결제 금액</Text>
                   <Text className="text-desc-1 text-main font-semibold">
-                    {finalAmount.toLocaleString()}원
+                    {amount.toLocaleString()}원
                   </Text>
                 </View>
               );

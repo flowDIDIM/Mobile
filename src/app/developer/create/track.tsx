@@ -12,7 +12,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import { client } from "@/lib/api-client";
+import { clientQuery } from "@/lib/api-client";
 import { colors } from "@/design-system";
 
 export default function CreateTrack() {
@@ -33,44 +33,29 @@ export default function CreateTrack() {
     [params.tracks],
   );
 
-  const validateTrackMutation = useMutation({
-    mutationFn: async ({
-      packageName,
-      trackId,
-    }: {
-      packageName: string;
-      trackId: string;
-    }) => {
-      const response = await client.developer.validate.track.$post({
-        json: { packageName, trackId },
-      });
+  const { isPending, mutate: validateTrackMutation } = useMutation(
+    clientQuery.developer.validate.track.$post.mutationOptions({
+      onSuccess: (data, input) => {
+        if (!data.hasGroups) {
+          // Show error bottom sheet
+          bottomSheetRef.current?.expand();
+          return;
+        }
 
-      if (!response.ok) {
-        throw new Error("Track validation failed");
-      }
-
-      return response.json();
-    },
-    onSuccess: (data, variables) => {
-      if (!data.hasGroups) {
-        // Show error bottom sheet
+        // Navigate to info page with package and track info
+        router.push({
+          pathname: "/developer/create/info",
+          params: {
+            packageName: input.json.packageName,
+            trackId: input.json.trackId,
+          },
+        });
+      },
+      onError: () => {
         bottomSheetRef.current?.expand();
-        return;
-      }
-
-      // Navigate to info page with package and track info
-      router.push({
-        pathname: "/developer/create/info",
-        params: {
-          packageName: variables.packageName,
-          trackId: variables.trackId,
-        },
-      });
-    },
-    onError: () => {
-      bottomSheetRef.current?.expand();
-    },
-  });
+      },
+    }),
+  );
 
   const form = useForm({
     defaultValues: {
@@ -79,9 +64,11 @@ export default function CreateTrack() {
     onSubmit: async ({ value }) => {
       if (!value.trackId) return;
 
-      validateTrackMutation.mutate({
-        packageName: params.packageName as string,
-        trackId: value.trackId,
+      validateTrackMutation({
+        json: {
+          packageName: params.packageName as string,
+          trackId: value.trackId,
+        },
       });
     },
   });
@@ -117,7 +104,7 @@ export default function CreateTrack() {
                 value={field.state.value}
                 onValueChange={field.handleChange}
                 placeholder="ex)com.didim.~"
-                disabled={validateTrackMutation.isPending}
+                disabled={isPending}
               />
             )}
           </form.Field>
@@ -140,11 +127,11 @@ export default function CreateTrack() {
           {({ canSubmit, isSubmitting }) => (
             <Button
               variant="standard"
-              disabled={!canSubmit || validateTrackMutation.isPending}
+              disabled={!canSubmit || isPending}
               onPress={form.handleSubmit}
               className="bg-primary"
             >
-              {validateTrackMutation.isPending ? "확인 중..." : "다음"}
+              {isPending ? "확인 중..." : "다음"}
             </Button>
           )}
         </form.Subscribe>

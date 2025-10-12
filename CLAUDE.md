@@ -88,51 +88,102 @@ import { Home, User, Search } from "lucide-react-native";
 
 ### State Management and Forms
 
-#### TanStack Query
-The app uses **TanStack Query v5** for server state management:
+#### TanStack Query with Hono RPC
+The app uses **TanStack Query v5** with **Hono RPC client** for type-safe server state management:
 - QueryClient is configured in `src/app/_layout.tsx` with retry and refetch options
-- Use `useMutation` for data mutations (POST, PUT, DELETE operations)
-- Use `useQuery` for data fetching when implementing read operations
-- Queries are automatically cached and invalidated
+- **ALWAYS use `clientQuery` from `@/lib/api-client`** instead of manual `queryFn`/`mutationFn`
+- `clientQuery` automatically handles queryKey, queryFn, mutationKey, and mutationFn
+- Destructure the hook when you only use one query/mutation per component
+- Use `useMutation` with `clientQuery.path.to.endpoint.$post.mutationOptions()` for mutations
+- Use `useQuery` with `clientQuery.path.to.endpoint.$post.queryOptions()` for queries
 
-Example mutation:
+**Mutation Example:**
 ```tsx
 import { useMutation } from "@tanstack/react-query";
-import { client } from "@/lib/api-client";
+import { clientQuery } from "@/lib/api-client";
 
+// ✅ CORRECT: Destructure and use clientQuery
+const { isPending, mutate } = useMutation(
+  clientQuery.developer.validate.package.$post.mutationOptions({
+    onSuccess: (data, input) => {
+      // data: response from server
+      // input: request input including { json: {...} }
+      console.log(data);
+    },
+    onError: (error) => {
+      // Handle error
+    },
+  }),
+);
+
+// Use the mutation
+mutate({ json: { packageName: "com.example.app" } });
+```
+
+**Query Example:**
+```tsx
+import { useQuery } from "@tanstack/react-query";
+import { clientQuery } from "@/lib/api-client";
+
+// ✅ CORRECT: Use clientQuery with queryOptions
+const { data, isLoading } = useQuery(
+  clientQuery.developer.validate.app.$post.queryOptions({
+    input: {
+      json: {
+        packageName: params.packageName,
+        trackId: params.trackId,
+      },
+    },
+    enabled: !!params.packageName && !!params.trackId,
+  }),
+);
+```
+
+**What NOT to do:**
+```tsx
+// ❌ NEVER manually write queryFn or mutationFn
 const mutation = useMutation({
   mutationFn: async (data) => {
     const response = await client.api.endpoint.$post({ json: data });
     if (!response.ok) throw new Error("Request failed");
     return response.json();
   },
-  onSuccess: (data) => {
-    // Handle success
-  },
-  onError: (error) => {
-    // Handle error
-  },
 });
 
-// Use mutation
-mutation.mutate(formData);
+// ❌ NEVER manually write queryKey
+const query = useQuery({
+  queryKey: ["key"],
+  queryFn: async () => { /* ... */ },
+});
 ```
 
-#### TanStack Form
-The app uses **TanStack Form** for form state management:
+#### TanStack Form with Zod Validation
+The app uses **TanStack Form** with **Zod** for type-safe form state management and validation:
 - Provides type-safe form handling with React Native components
+- **ALWAYS use Zod schemas for validation** - no adapter needed
+- TanStack Form natively supports Zod schemas via the Standard Schema specification
 - Use `useForm` hook to create form instances
 - Use `form.Field` component to bind form fields to inputs
 - Use `form.Subscribe` to reactively access form state
 
-Example form:
+**Form with Zod Validation Example:**
 ```tsx
 import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+
+// ✅ CORRECT: Define Zod schema for validation
+const formSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
 const form = useForm({
   defaultValues: {
     email: "",
     password: "",
+  },
+  validators: {
+    onChange: formSchema,
   },
   onSubmit: async ({ value }) => {
     // Handle form submission
@@ -143,10 +194,18 @@ const form = useForm({
 // In JSX
 <form.Field name="email">
   {(field) => (
-    <BoxField
-      value={field.state.value}
-      onChangeText={field.handleChange}
-    />
+    <>
+      <BoxField
+        value={field.state.value}
+        onChangeText={field.handleChange}
+        variant={field.state.meta.errors.length > 0 ? "error" : "default"}
+      />
+      {field.state.meta.errors[0] && (
+        <Text className="text-error text-desc-1 mt-1">
+          {field.state.meta.errors[0].message}
+        </Text>
+      )}
+    </>
   )}
 </form.Field>
 
@@ -167,9 +226,29 @@ const form = useForm({
 </form.Subscribe>
 ```
 
+**What NOT to do:**
+```tsx
+// ❌ NEVER manually implement validators
+const form = useForm({
+  validators: {
+    onChange: ({ value }) => {
+      if (!value.email) {
+        return { fields: { email: "Email is required" } };
+      }
+      // ... more manual validation
+    },
+  },
+});
+
+// ❌ NEVER use the deprecated @tanstack/zod-form-adapter
+import { zodValidator } from "@tanstack/zod-form-adapter"; // Don't do this
+```
+
 **IMPORTANT Guidelines:**
 - Always use TanStack Form for form state management instead of manual useState for form fields
-- Use TanStack Query's `useMutation` for API calls instead of manual loading states
+- **ALWAYS use Zod schemas directly in `validators.onChange`** - no adapter needed
+- Access error messages via `field.state.meta.errors[0].message`
+- Use TanStack Query's `useMutation` (with `clientQuery`) for API calls instead of manual loading states
 - Combine both: TanStack Form for form state + TanStack Query mutation for API submission
 - Use `form.setFieldValue` to programmatically update field values
 - Use `useMemo` to optimize expensive computations when parsing form data
