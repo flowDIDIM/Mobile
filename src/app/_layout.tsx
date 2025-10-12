@@ -9,7 +9,7 @@ export default function RootLayout() {
     <>
       <StatusBar style="light" translucent backgroundColor="transparent" />
       <LinearGradient
-        colors={[colors.backgroundGradientStart, colors.backgroundGradientEnd]}
+        colors={[colors.bg.start, colors.bg.end]}
         locations={[0.37, 1]}
         style={{ flex: 1 }}
       >

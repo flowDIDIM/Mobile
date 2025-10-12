@@ -9,7 +9,7 @@ export default {
       colors: {
         primary: "#4F96FF",
         secondary: "#1875FF",
-        error: "#F95052",
+        error: "#FF4F52",
 
         main: "#F1F3F3", // gray-50
         sub: "#919DA1", // gray-400
@@ -30,8 +30,10 @@ export default {
           1000: "#000000",
         },
 
-        backgroundGradientStart: "#17191C",
-        backgroundGradientEnd: "rgba(28, 34, 45, 0.8)",
+        bg: {
+          start: "#17191C",
+          end: "rgba(28, 34, 45, 0.8)",
+        },
       },
 
       fontSize: {
