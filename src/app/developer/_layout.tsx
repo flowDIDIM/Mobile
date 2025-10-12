@@ -40,6 +40,14 @@ export default function DeveloperLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="my"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <UserRound size={24} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
