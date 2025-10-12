@@ -61,7 +61,7 @@ export default function DeveloperIndex() {
           <View className="items-center justify-center flex-1 px-5">
             <View className="items-center gap-6">
               <View className="items-center gap-1">
-                <Text className="text-body-3 text-center text-[20px] text-red-800">
+                <Text className="text-sub text-body-3 text-center text-[16px]">
                   등록된 앱이 없습니다
                 </Text>
                 <Text className="text-sub text-body-3 text-center text-[16px]">
