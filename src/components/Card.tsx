@@ -34,12 +34,13 @@ const actionTextVariants = cva("text-button text-right", {
 
 interface CardProps extends PressableProps, VariantProps<typeof cardVariants> {
   appName: string;
-  description: string;
-  points: number;
+  description?: string;
+  points?: number;
   currentTesters: number;
   maxTesters: number;
   imageUrl?: string;
   onActionPress?: () => void;
+  actionText?: string;
   className?: string;
 }
 
@@ -52,6 +53,7 @@ export function Card({
   maxTesters,
   imageUrl,
   onActionPress,
+  actionText = "참여하기",
   className,
   ...props
 }: CardProps) {
@@ -65,17 +67,20 @@ export function Card({
         <View className="h-12 justify-between flex-1">
           <View className="gap-0.5">
             <Text className="text-main text-title-4">{appName}</Text>
-            <Text className="text-main text-desc-2">{description}</Text>
+            {description && (
+              <Text className="text-sub text-desc-3">{description}</Text>
+            )}
           </View>
           <Text className="text-sub text-desc-3">
-            획득 포인트 {points}P · 테스터 정원 {currentTesters}/{maxTesters}
+            {points !== undefined && `획득 포인트 ${points}P · `}테스터 수{" "}
+            {currentTesters}/{maxTesters}
           </Text>
         </View>
       </View>
 
       {/* Action Button */}
       <Pressable onPress={onActionPress}>
-        <Text className={actionTextVariants({ variant })}>참여하기</Text>
+        <Text className={actionTextVariants({ variant })}>{actionText}</Text>
       </Pressable>
     </Pressable>
   );

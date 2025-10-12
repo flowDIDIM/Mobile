@@ -1,10 +1,20 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
+import * as SystemUI from "expo-system-ui";
+import { useEffect } from "react";
+import { Platform } from "react-native";
 import "./global.css";
 import { colors } from "@/design-system";
 
 export default function RootLayout() {
+  useEffect(() => {
+    // Set Android navigation bar to white
+    if (Platform.OS === "android") {
+      void SystemUI.setBackgroundColorAsync("#ffffff");
+    }
+  }, []);
+
   return (
     <>
       <StatusBar style="light" translucent backgroundColor="transparent" />
@@ -15,7 +25,7 @@ export default function RootLayout() {
       >
         <Stack
           screenOptions={{
-            // headerShown: false,
+            headerShown: false,
             headerTransparent: true,
             contentStyle: { backgroundColor: "transparent" },
           }}

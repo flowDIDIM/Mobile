@@ -106,7 +106,39 @@ When the backend API changes:
 1. Create files in `src/app/` following Expo Router conventions
 2. Use `_layout.tsx` files for nested navigation
 3. Route groups use parentheses: `(groupName)/`
-4. Typed routes are enabled - use `router.push()` with autocomplete
+4. Typed routes are enabled - **ALWAYS use `<Link>` component for navigation**
+
+### Navigation Guidelines
+
+**CRITICAL: Always use `<Link>` component for navigation, never `router.push()` with onClick handlers.**
+
+Good example:
+```tsx
+import { Link } from "expo-router";
+
+<Link href="/developer/create/package" asChild>
+  <Pressable className="bg-secondary px-2.5 py-2 rounded-lg">
+    <Text>등록하기</Text>
+  </Pressable>
+</Link>
+```
+
+Bad example:
+```tsx
+// ❌ DON'T DO THIS
+const handleNavigate = () => {
+  router.push("/developer/create/package");
+};
+
+<Pressable onPress={handleNavigate}>
+  <Text>등록하기</Text>
+</Pressable>
+```
+
+**When to use `router` methods:**
+- Use `router.replace()` for replacing navigation stack
+- Use `router.back()` for programmatic back navigation
+- Use `router.push()` ONLY when navigation needs dynamic parameters or conditional logic that cannot be expressed with `<Link>`
 
 ### Styling Components
 - Use NativeWind className prop: `className="text-gray-50 text-title-3"`
@@ -168,3 +200,54 @@ export function Button({ variant, size, className, ...props }: ButtonProps) {
 - **Import Extensions**: ESLint rule disabled - no need to add file extensions to imports
 - **Gradient Background**: Root layout applies a global gradient background to all screens
 - **Safe Area Handling**: Use `useSafeAreaInsets()` from `react-native-safe-area-context` for proper spacing
+
+## Type Safety and Code Quality Rules
+
+### NEVER Use Type Assertions
+
+**CRITICAL: Never use `as any`, `as unknown`, or any type assertions to suppress TypeScript errors.**
+
+```tsx
+// ❌ NEVER DO THIS
+router.push("/some/path" as any);
+const value = someFunction() as unknown as SomeType;
+
+// ✅ ALWAYS DO THIS - Fix the actual type issue
+router.push("/some/path"); // If this errors, see below about route types
+```
+
+### Handling Route Type Errors
+
+**When working with Expo Router typed routes, you may see TypeScript errors for route paths that don't exist yet.**
+
+**IMPORTANT: Route types are generated after the first build. If you see a TypeScript error on a route path:**
+
+1. **DO NOT use `as any` or type assertions**
+2. **Ignore the error and continue with the implementation**
+3. **The error will disappear after running the app once (the build process generates the route types)**
+
+Example scenario:
+```tsx
+// You might see: Type '"developer/create/package"' is not assignable to type 'Href'
+// This happens because the route types haven't been generated yet
+
+// ❌ DON'T DO THIS
+<Link href="/developer/create/package" as any>
+
+// ✅ DO THIS - Just ignore the TypeScript error
+<Link href="/developer/create/package">
+  {/* The error will resolve after first build */}
+</Link>
+```
+
+**Why this happens:**
+- Expo Router generates route types from your file structure
+- These types are created during the build process
+- New routes won't have types until you run the app at least once
+- The types are stored in `.expo/types/` (generated automatically)
+
+**Summary:**
+- Write the correct route path
+- Ignore any TypeScript errors about route types
+- Run the app - the types will be generated automatically
+- The error will disappear after the first build
