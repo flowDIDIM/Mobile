@@ -72,7 +72,12 @@ export function Dropdown({
         disabled={disabled}
         {...props}
       >
-        <View className={cn(dropdownVariants({ variant: actualVariant }), className)}>
+        <View
+          className={cn(
+            dropdownVariants({ variant: actualVariant }),
+            className,
+          )}
+        >
           <Text
             className={cn(
               "text-desc-1",

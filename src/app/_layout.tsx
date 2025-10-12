@@ -6,11 +6,22 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./global.css";
 import { colors } from "@/design-system";
 
 // Keep the splash screen visible while we fetch resources
 void SplashScreen.preventAutoHideAsync();
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -41,7 +52,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <StatusBar style="light" translucent backgroundColor="transparent" />
       <LinearGradient
         colors={[colors.bg.start, colors.bg.end]}
@@ -56,6 +67,6 @@ export default function RootLayout() {
           }}
         />
       </LinearGradient>
-    </>
+    </QueryClientProvider>
   );
 }

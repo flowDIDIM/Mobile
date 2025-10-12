@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { Dropdown, type DropdownOption } from "@/components/Dropdown";
 import { Button } from "@/components/Button";
 import BottomSheet, {
@@ -17,55 +19,72 @@ export default function CreateTrack() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [selectedTrack, setSelectedTrack] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
   const bottomSheetRef = React.useRef<BottomSheet>(null);
 
   // Parse tracks from params
-  const tracks: DropdownOption[] = params.tracks
-    ? JSON.parse(params.tracks as string).map((track: any) => ({
-        label: track.name,
-        value: track.id,
-      }))
-    : [];
+  const tracks: DropdownOption[] = useMemo(
+    () =>
+      params.tracks
+        ? JSON.parse(params.tracks as string).map((track: any) => ({
+            label: track.name,
+            value: track.id,
+          }))
+        : [],
+    [params.tracks],
+  );
 
-  const handleValidateTrack = async () => {
-    if (!selectedTrack) return;
-
-    setIsLoading(true);
-    try {
+  const validateTrackMutation = useMutation({
+    mutationFn: async ({
+      packageName,
+      trackId,
+    }: {
+      packageName: string;
+      trackId: string;
+    }) => {
       const response = await client.developer.validate.track.$post({
-        json: {
-          packageName: params.packageName as string,
-          trackId: selectedTrack,
-        },
+        json: { packageName, trackId },
       });
 
       if (!response.ok) {
-        // Show error bottom sheet for missing groups
-        bottomSheetRef.current?.expand();
-        setIsLoading(false);
-        return;
+        throw new Error("Track validation failed");
       }
 
-      const data = await response.json();
-
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
       if (!data.hasGroups) {
         // Show error bottom sheet
         bottomSheetRef.current?.expand();
-        setIsLoading(false);
         return;
       }
 
-      // Navigate to info page
-      router.push("/developer/create/info");
-    } catch (error) {
-      console.error("Track validation error:", error);
+      // Navigate to info page with package and track info
+      router.push({
+        pathname: "/developer/create/info",
+        params: {
+          packageName: variables.packageName,
+          trackId: variables.trackId,
+        },
+      });
+    },
+    onError: () => {
       bottomSheetRef.current?.expand();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
+
+  const form = useForm({
+    defaultValues: {
+      trackId: "",
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.trackId) return;
+
+      validateTrackMutation.mutate({
+        packageName: params.packageName as string,
+        trackId: value.trackId,
+      });
+    },
+  });
 
   const handleCloseBottomSheet = () => {
     bottomSheetRef.current?.close();
@@ -91,13 +110,17 @@ export default function CreateTrack() {
       <View className="flex-1 px-7 pt-14">
         <View className="py-2 gap-3">
           <Text className="text-main text-title-3">트랙을 선택해 주세요.</Text>
-          <Dropdown
-            options={tracks}
-            value={selectedTrack}
-            onValueChange={setSelectedTrack}
-            placeholder="ex)com.didim.~"
-            disabled={isLoading}
-          />
+          <form.Field name="trackId">
+            {(field) => (
+              <Dropdown
+                options={tracks}
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="ex)com.didim.~"
+                disabled={validateTrackMutation.isPending}
+              />
+            )}
+          </form.Field>
         </View>
       </View>
 
@@ -108,14 +131,23 @@ export default function CreateTrack() {
           paddingBottom: insets.bottom + 20,
         }}
       >
-        <Button
-          variant="standard"
-          disabled={!selectedTrack || isLoading}
-          onPress={handleValidateTrack}
-          className="bg-primary"
+        <form.Subscribe
+          selector={(state) => ({
+            canSubmit: state.canSubmit,
+            isSubmitting: state.isSubmitting,
+          })}
         >
-          {isLoading ? "확인 중..." : "다음"}
-        </Button>
+          {({ canSubmit, isSubmitting }) => (
+            <Button
+              variant="standard"
+              disabled={!canSubmit || validateTrackMutation.isPending}
+              onPress={form.handleSubmit}
+              className="bg-primary"
+            >
+              {validateTrackMutation.isPending ? "확인 중..." : "다음"}
+            </Button>
+          )}
+        </form.Subscribe>
       </View>
 
       {/* Error Bottom Sheet - No Groups */}

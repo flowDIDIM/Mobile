@@ -1,8 +1,10 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import BottomSheet, {
@@ -15,43 +17,71 @@ import { client } from "@/lib/api-client";
 export default function CreatePackage() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [packageName, setPackageName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const bottomSheetRef = React.useRef<BottomSheet>(null);
 
-  const handleValidatePackage = async () => {
-    if (!packageName.trim()) return;
-
-    setIsLoading(true);
-    try {
+  const validatePackageMutation = useMutation({
+    mutationFn: async (packageName: string) => {
       const response = await client.developer.validate.package.$post({
-        json: { packageName: packageName.trim() },
+        json: { packageName },
       });
 
       if (!response.ok) {
-        // Show error bottom sheet
-        bottomSheetRef.current?.expand();
-        setIsLoading(false);
-        return;
+        throw new Error("Package validation failed");
       }
 
-      const data = await response.json();
-
+      return response.json();
+    },
+    onSuccess: (data, packageName) => {
       // Navigate to next page with track data
       router.push({
         pathname: "/developer/create/track",
         params: {
-          packageName: packageName.trim(),
+          packageName,
           tracks: JSON.stringify(data.tracks),
         },
       });
-    } catch (error) {
-      console.error("Validation error:", error);
+    },
+    onError: () => {
       bottomSheetRef.current?.expand();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
+
+  const form = useForm({
+    defaultValues: {
+      packageName: "",
+    },
+    validators: {
+      onChange: ({ value }) => {
+        // Android package name validation
+        const trimmedValue = value.packageName.trim();
+
+        if (!trimmedValue) {
+          return {
+            form: "패키지명을 입력해주세요",
+            fields: {
+              packageName: "패키지명을 입력해주세요",
+            },
+          };
+        }
+
+        const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+        if (!packageRegex.test(trimmedValue)) {
+          return {
+            form: "올바른 Android 패키지명 형식이 아닙니다",
+            fields: {
+              packageName:
+                "올바른 Android 패키지명 형식이 아닙니다 (예: com.company.app)",
+            },
+          };
+        }
+
+        return undefined;
+      },
+    },
+    onSubmit: async ({ value }) => {
+      validatePackageMutation.mutate(value.packageName.trim());
+    },
+  });
 
   const handleCloseBottomSheet = () => {
     bottomSheetRef.current?.close();
@@ -78,12 +108,26 @@ export default function CreatePackage() {
           <Text className="text-main text-title-3">
             패키지 명을 입력해 주세요.
           </Text>
-          <BoxField
-            placeholder="ex)com.didim.~"
-            value={packageName}
-            onChangeText={setPackageName}
-            editable={!isLoading}
-          />
+          <form.Field name="packageName">
+            {(field) => (
+              <>
+                <BoxField
+                  placeholder="ex)com.didim.~"
+                  value={field.state.value}
+                  onChangeText={field.handleChange}
+                  editable={!validatePackageMutation.isPending}
+                  variant={
+                    field.state.meta.errors.length > 0 ? "error" : "default"
+                  }
+                />
+                {field.state.meta.errors.length > 0 && (
+                  <Text className="text-error text-desc-1 mt-1">
+                    {field.state.meta.errors[0]}
+                  </Text>
+                )}
+              </>
+            )}
+          </form.Field>
         </View>
       </View>
 
@@ -94,14 +138,23 @@ export default function CreatePackage() {
           paddingBottom: insets.bottom + 20,
         }}
       >
-        <Button
-          variant="standard"
-          disabled={!packageName.trim() || isLoading}
-          onPress={handleValidatePackage}
-          className="bg-primary"
+        <form.Subscribe
+          selector={(state) => ({
+            canSubmit: state.canSubmit,
+            isSubmitting: state.isSubmitting,
+          })}
         >
-          {isLoading ? "확인 중..." : "다음"}
-        </Button>
+          {({ canSubmit, isSubmitting }) => (
+            <Button
+              variant="standard"
+              disabled={!canSubmit || validatePackageMutation.isPending}
+              onPress={form.handleSubmit}
+              className="bg-primary"
+            >
+              {validatePackageMutation.isPending ? "확인 중..." : "다음"}
+            </Button>
+          )}
+        </form.Subscribe>
       </View>
 
       {/* Error Bottom Sheet */}

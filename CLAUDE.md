@@ -72,7 +72,7 @@ NativeWind v4 with custom design tokens:
 - Bottom sheets use `@gorhom/bottom-sheet` library
 - All components use **CVA (class-variance-authority)** for variant management
 - Use the `cn()` utility from `@/lib/utils` for conditional className merging
-- Components available: Button, Card, Toast, TopNav, Modal, BoxField, Badge
+- Components available: Button, Card, Toast, TopNav, Modal, BoxField, Badge, Dropdown
 
 ### Icons
 - **ALWAYS use `lucide-react-native` for icons** - do not use other icon libraries
@@ -85,6 +85,94 @@ import { Home, User, Search } from "lucide-react-native";
 <Home color="#4F96FF" size={24} />
 <User color="#F1F3F3" size={20} strokeWidth={2} />
 ```
+
+### State Management and Forms
+
+#### TanStack Query
+The app uses **TanStack Query v5** for server state management:
+- QueryClient is configured in `src/app/_layout.tsx` with retry and refetch options
+- Use `useMutation` for data mutations (POST, PUT, DELETE operations)
+- Use `useQuery` for data fetching when implementing read operations
+- Queries are automatically cached and invalidated
+
+Example mutation:
+```tsx
+import { useMutation } from "@tanstack/react-query";
+import { client } from "@/lib/api-client";
+
+const mutation = useMutation({
+  mutationFn: async (data) => {
+    const response = await client.api.endpoint.$post({ json: data });
+    if (!response.ok) throw new Error("Request failed");
+    return response.json();
+  },
+  onSuccess: (data) => {
+    // Handle success
+  },
+  onError: (error) => {
+    // Handle error
+  },
+});
+
+// Use mutation
+mutation.mutate(formData);
+```
+
+#### TanStack Form
+The app uses **TanStack Form** for form state management:
+- Provides type-safe form handling with React Native components
+- Use `useForm` hook to create form instances
+- Use `form.Field` component to bind form fields to inputs
+- Use `form.Subscribe` to reactively access form state
+
+Example form:
+```tsx
+import { useForm } from "@tanstack/react-form";
+
+const form = useForm({
+  defaultValues: {
+    email: "",
+    password: "",
+  },
+  onSubmit: async ({ value }) => {
+    // Handle form submission
+    console.log(value);
+  },
+});
+
+// In JSX
+<form.Field name="email">
+  {(field) => (
+    <BoxField
+      value={field.state.value}
+      onChangeText={field.handleChange}
+    />
+  )}
+</form.Field>
+
+<form.Subscribe
+  selector={(state) => ({
+    canSubmit: state.canSubmit,
+    isSubmitting: state.isSubmitting,
+  })}
+>
+  {({ canSubmit, isSubmitting }) => (
+    <Button
+      disabled={!canSubmit || isSubmitting}
+      onPress={form.handleSubmit}
+    >
+      Submit
+    </Button>
+  )}
+</form.Subscribe>
+```
+
+**IMPORTANT Guidelines:**
+- Always use TanStack Form for form state management instead of manual useState for form fields
+- Use TanStack Query's `useMutation` for API calls instead of manual loading states
+- Combine both: TanStack Form for form state + TanStack Query mutation for API submission
+- Use `form.setFieldValue` to programmatically update field values
+- Use `useMemo` to optimize expensive computations when parsing form data
 
 ### Expo Configuration
 - App name: DIDIM
