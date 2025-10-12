@@ -19,10 +19,13 @@ pnpm web            # Run in web browser
 ### Code quality
 ```bash
 pnpm lint           # Run ESLint (uses expo lint with Prettier integration)
+pnpm format         # Format code with Prettier
 ```
 
 ### Package management
 This project uses **pnpm** as the package manager.
+
+**IMPORTANT**: After completing any code changes, always run `pnpm format` to ensure consistent code formatting across the project.
 
 ## Architecture Overview
 
@@ -66,8 +69,22 @@ NativeWind v4 with custom design tokens:
 
 ### Component Architecture
 - Reusable components in `src/components/`
-- Key components: `ScreenLayout`, `CTAButton`, `InputField`, `ErrorBottomSheet`, `GroupAccessBottomSheet`, `TrackSelectBottomSheet`
 - Bottom sheets use `@gorhom/bottom-sheet` library
+- All components use **CVA (class-variance-authority)** for variant management
+- Use the `cn()` utility from `@/lib/utils` for conditional className merging
+- Components available: Button, Card, Toast, TopNav, Modal, BoxField, Badge
+
+### Icons
+- **ALWAYS use `lucide-react-native` for icons** - do not use other icon libraries
+- Import icons from `lucide-react-native`
+- Icons are tree-shakeable and optimized for React Native
+- Example usage:
+```tsx
+import { Home, User, Search } from "lucide-react-native";
+
+<Home color="#4F96FF" size={24} />
+<User color="#F1F3F3" size={20} strokeWidth={2} />
+```
 
 ### Expo Configuration
 - App name: DIDIM
@@ -96,6 +113,50 @@ When the backend API changes:
 - For programmatic colors: import from `@/design-system`
 - Custom font sizes follow the design system (e.g., `text-title-1`, `text-desc-2`)
 
+### Creating New Components
+When creating new UI components:
+1. Use **class-variance-authority (CVA)** for variant management
+2. Use **clsx** (via the `cn()` utility from `@/lib/utils`) for conditional class names
+3. Always provide TypeScript types using `VariantProps<typeof yourVariants>`
+4. Export variants separately if they need to be reused
+5. Support a `className` prop for style overrides
+
+Example:
+```tsx
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+
+const buttonVariants = cva(
+  "base-classes-here",
+  {
+    variants: {
+      variant: {
+        default: "variant-specific-classes",
+        secondary: "other-variant-classes",
+      },
+      size: {
+        sm: "small-size-classes",
+        lg: "large-size-classes",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "sm",
+    },
+  }
+);
+
+interface ButtonProps
+  extends ComponentProps,
+    VariantProps<typeof buttonVariants> {
+  className?: string;
+}
+
+export function Button({ variant, size, className, ...props }: ButtonProps) {
+  return <Pressable className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+}
+```
+
 ### Environment Setup
 1. Copy environment variables (see `.env.local` for current setup)
 2. Set `EXPO_PUBLIC_API_URL` to point to your backend server
@@ -105,6 +166,5 @@ When the backend API changes:
 
 - **React Compiler**: Experimental React Compiler is enabled - avoid manual memoization unless necessary
 - **Import Extensions**: ESLint rule disabled - no need to add file extensions to imports
-- **Transparent Navigation**: Custom Android plugins in `src/plugins/` handle transparent navigation bar
 - **Gradient Background**: Root layout applies a global gradient background to all screens
 - **Safe Area Handling**: Use `useSafeAreaInsets()` from `react-native-safe-area-context` for proper spacing
