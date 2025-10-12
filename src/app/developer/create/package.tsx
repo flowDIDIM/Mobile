@@ -73,7 +73,7 @@ export default function CreatePackage() {
   return (
     <GestureHandlerRootView className="flex-1">
       {/* Content */}
-      <View className="flex-1 px-7">
+      <View className="flex-1 px-7 pt-14">
         <View className="py-2 gap-3">
           <Text className="text-main text-title-3">
             패키지 명을 입력해 주세요.

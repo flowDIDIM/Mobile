@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "flex-row items-center justify-center px-2.5 py-3 rounded-lg gap-2.5",
+  "flex-row items-center justify-center h-[41px] px-2.5 rounded-lg gap-2.5",
   {
     variants: {
       variant: {

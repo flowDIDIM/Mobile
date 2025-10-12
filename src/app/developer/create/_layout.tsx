@@ -5,6 +5,7 @@ export default function CreateLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
+        headerTransparent: false,
         contentStyle: { backgroundColor: "transparent" },
         headerStyle: {
           backgroundColor: "transparent",

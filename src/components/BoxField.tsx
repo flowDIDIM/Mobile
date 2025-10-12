@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const boxFieldVariants = cva(
-  "bg-white/[0.04] border border-white/[0.08] rounded px-3 py-3 text-desc-1 text-sub",
+  "bg-white/[0.04] border border-white/[0.08] rounded h-11 px-3 text-desc-1 text-sub",
   {
     variants: {
       variant: {

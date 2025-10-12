@@ -11,12 +11,9 @@ export default function Index() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        // callbackURL: "/developer",
+        callbackURL: "/developer",
         scopes: ["https://www.googleapis.com/auth/androidpublisher"],
-        disableRedirect: true,
       });
-      // After successful login, replace to prevent going back to role selection
-      router.replace("/developer");
     } catch (error) {
       console.error("Google login failed:", error);
     }
@@ -27,7 +24,6 @@ export default function Index() {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/tester",
-        disableRedirect: true,
       });
       // After successful login, replace to prevent going back to role selection
       router.replace("/tester");
