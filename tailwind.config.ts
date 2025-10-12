@@ -6,6 +6,15 @@ export default {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["WantedSans-Regular"],
+        medium: ["WantedSans-Medium"],
+        semibold: ["WantedSans-SemiBold"],
+        bold: ["WantedSans-Bold"],
+        extrabold: ["WantedSans-ExtraBold"],
+        black: ["WantedSans-Black"],
+        extrablack: ["WantedSans-ExtraBlack"],
+      },
       colors: {
         primary: "#4F96FF",
         secondary: "#1875FF",
