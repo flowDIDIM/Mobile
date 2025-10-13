@@ -105,27 +105,26 @@ export function Dropdown({
         >
           <View className="flex-1 justify-center px-7">
             <Pressable onPress={(e) => e.stopPropagation()}>
-              <View className="bg-gray-800 rounded-lg border border-white/[0.08] max-h-[300px]">
-                <FlatList
-                  data={options}
-                  keyExtractor={(item) => item.value}
-                  renderItem={({ item }) => (
-                    <Pressable
-                      onPress={() => handleSelect(item.value)}
-                      className="px-4 py-3 border-b border-white/[0.08]"
+              <FlatList
+                data={options}
+                keyExtractor={(item) => item.value}
+                renderItem={({ item }) => (
+                  <Pressable
+                    onPress={() => handleSelect(item.value)}
+                    className="px-4 py-3 border-b border-white/[0.08]"
+                  >
+                    <Text
+                      className={cn(
+                        "text-desc-1",
+                        item.value === value ? "text-primary" : "text-main",
+                      )}
                     >
-                      <Text
-                        className={cn(
-                          "text-desc-1",
-                          item.value === value ? "text-primary" : "text-main",
-                        )}
-                      >
-                        {item.label}
-                      </Text>
-                    </Pressable>
-                  )}
-                />
-              </View>
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                )}
+                className="bg-gray-800 rounded-lg border border-white/[0.08] max-h-[300px]"
+              />
             </Pressable>
           </View>
         </Pressable>
