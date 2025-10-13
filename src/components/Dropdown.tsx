@@ -96,14 +96,15 @@ export function Dropdown({
             <Pressable onPress={(e) => e.stopPropagation()}>
               <FlatList
                 data={options}
-                keyExtractor={(item) => item.value}
                 renderItem={({ item }) => (
                   <Pressable
                     onPress={() => handleSelect(item.value)}
                     className="px-4 py-3 border-b border-white/[0.08]"
                   >
                     <Desc1
-                      className={cn(item.value === value ? "text-primary" : "")}
+                      className={cn(
+                        item.value === value ? "text-primary" : "text-main",
+                      )}
                     >
                       {item.label}
                     </Desc1>
