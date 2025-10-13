@@ -22,7 +22,7 @@ const packageSchema = z.object({
     .min(1, "패키지명을 입력해주세요")
     .regex(
       /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/,
-      "올바른 Android 패키지명 형식이 아닙니다 (예: com.company.app)",
+      "올바른 Android 패키지명 형식이 아닙니다\n(예: com.company.app)",
     ),
 });
 
