@@ -67,16 +67,17 @@ function createHcQueryEndpoint<TEndpoint extends ClientRequestEndpoint>(
           input: input,
         }),
         queryFn: async ({ signal }) => {
+          console.log(`--> GET ${JSON.stringify(input)}`);
           const res = await endpoint(input, { init: { signal } });
+          const json = await res.json();
 
           if (!res.ok) {
+            console.log(`<-- ERROR ${res.status} ${JSON.stringify(json)}`);
             throw new Error(`Request failed with status ${res.status}`);
           }
 
-          return (await res.json()) as InferResponseType<
-            TEndpoint,
-            SuccessStatusCode
-          >;
+          console.log(`<-- ${res.status}`, JSON.stringify(json));
+          return json as InferResponseType<TEndpoint, SuccessStatusCode>;
         },
       };
     },
@@ -87,16 +88,18 @@ function createHcQueryEndpoint<TEndpoint extends ClientRequestEndpoint>(
           type: "mutation",
         }),
         mutationFn: async (input) => {
+          console.log(`--> POST ${JSON.stringify(input)}`);
+
           const res = await endpoint(input);
+          const json = await res.json();
 
           if (!res.ok) {
+            console.log(`<-- ERROR ${res.status} ${JSON.stringify(json)}`);
             throw new Error(`Request failed with status ${res.status}`);
           }
 
-          return (await res.json()) as InferResponseType<
-            TEndpoint,
-            SuccessStatusCode
-          >;
+          console.log(`<-- ${res.status}`, JSON.stringify(json));
+          return json as InferResponseType<TEndpoint, SuccessStatusCode>;
         },
       };
     },
