@@ -1,25 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useMemo } from "react";
 import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import { Title3, Desc1 } from "@/components/Typography";
-import { Upload, Plus } from "lucide-react-native";
-import { clientQuery } from "@/lib/api-client";
 
 const PAYMENT_PRESETS = [10000, 30000, 50000];
 
 const infoSchema = z.object({
   shortDescription: z.string().min(1, "한 줄 소개를 입력해주세요"),
-  icon: z.string().min(1, "아이콘을 선택해주세요"),
-  storeImages: z
-    .array(z.string())
-    .min(1, "상점 이미지를 최소 1개 이상 선택해주세요"),
   detailedDescription: z.string().min(1, "상세 설명을 입력해주세요"),
   paymentAmount: z
     .string()
@@ -34,26 +27,23 @@ export default function CreateInfo() {
   const params = useLocalSearchParams<{
     packageName: string;
     trackId: string;
+    appInfo: string;
   }>();
 
-  // Fetch app info from server
-  const { data: appInfo, isLoading } = useQuery(
-    clientQuery.developer.validate.app.$post.queryOptions({
-      input: {
-        json: {
-          packageName: params.packageName,
-          trackId: params.trackId,
-        },
-      },
-      enabled: !!params.packageName && !!params.trackId,
-    }),
-  );
+  // Parse app info from params
+  const appInfo = useMemo(() => {
+    if (!params.appInfo) return null;
+    return JSON.parse(params.appInfo) as {
+      shortDescription: string;
+      icon: string;
+      storeImages: string[];
+      detailedDescription: string;
+    };
+  }, [params.appInfo]);
 
   const form = useForm({
     defaultValues: {
       shortDescription: appInfo?.shortDescription || "",
-      storeImages: (appInfo?.storeImages || []) as string[],
-      icon: appInfo?.icon || "",
       detailedDescription: appInfo?.detailedDescription || "",
       paymentAmount: "",
     },
@@ -68,61 +58,9 @@ export default function CreateInfo() {
     },
   });
 
-  // Reset form with server data when appInfo is loaded
-  useEffect(() => {
-    if (appInfo) {
-      form.reset({
-        shortDescription: appInfo.shortDescription,
-        storeImages: appInfo.storeImages || [],
-        icon: appInfo.icon || "",
-        detailedDescription: appInfo.detailedDescription,
-        paymentAmount: "",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appInfo]);
-
-  const pickStoreImage = async (index: number) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      form.setFieldValue("storeImages", (prev) => {
-        const newImages = [...prev];
-        newImages[index] = result.assets[0].uri;
-        return newImages;
-      });
-    }
-  };
-
-  const pickIcon = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      form.setFieldValue("icon", result.assets[0].uri);
-    }
-  };
-
   const setPaymentPreset = (amount: number) => {
     form.setFieldValue("paymentAmount", amount.toString());
   };
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Title3>로딩 중...</Title3>
-      </View>
-    );
-  }
 
   return (
     <View className="flex-1">
@@ -163,87 +101,41 @@ export default function CreateInfo() {
           <Title3>2. 이미지</Title3>
           <View className="gap-3">
             {/* 아이콘 */}
-            <View>
-              <Desc1 className="mb-2">아이콘</Desc1>
-              <form.Field name="icon">
-                {(field) => (
-                  <>
-                    <Pressable
-                      onPress={pickIcon}
-                      className={`rounded-xl size-20 items-center justify-center ${
-                        field.state.meta.errors.length > 0
-                          ? "bg-error/10 border-2 border-error"
-                          : "bg-white/[0.04] border border-white/[0.08]"
-                      }`}
-                    >
-                      {field.state.value ? (
-                        <View className="size-20 rounded-xl overflow-hidden">
-                          {/* TODO: Display image */}
-                          <Text className="text-xs text-main">아이콘</Text>
-                        </View>
-                      ) : (
-                        <Upload size={24} color="#919DA1" />
-                      )}
-                    </Pressable>
-                    {field.state.meta.errors[0] && (
-                      <Desc1 className="text-error mt-1">
-                        {field.state.meta.errors[0].message}
-                      </Desc1>
-                    )}
-                  </>
-                )}
-              </form.Field>
-            </View>
+            {appInfo?.icon && (
+              <View>
+                <Desc1 className="mb-2">아이콘</Desc1>
+                <View className="rounded-xl size-20 overflow-hidden bg-white/[0.04] border border-white/[0.08]">
+                  <Image
+                    source={{ uri: appInfo.icon }}
+                    style={{ width: 80, height: 80 }}
+                    contentFit="cover"
+                    transition={200}
+                    placeholder="blur"
+                  />
+                </View>
+              </View>
+            )}
 
             {/* 상점 이미지 */}
-            <View>
-              <Desc1 className="mb-2">상점 이미지</Desc1>
-              <form.Field name="storeImages">
-                {(field) => (
-                  <>
-                    <View className="flex-row gap-3">
-                      <Pressable
-                        onPress={() => pickStoreImage(0)}
-                        className={`rounded-xl size-20 items-center justify-center ${
-                          field.state.meta.errors.length > 0 &&
-                          !field.state.value[0]
-                            ? "bg-error/10 border-2 border-error"
-                            : "bg-white/[0.04] border border-white/[0.08]"
-                        }`}
-                      >
-                        {field.state.value[0] ? (
-                          <View className="size-20 rounded-xl overflow-hidden">
-                            {/* TODO: Display image */}
-                            <Text className="text-xs text-main">이미지 1</Text>
-                          </View>
-                        ) : (
-                          <Upload size={24} color="#919DA1" />
-                        )}
-                      </Pressable>
-
-                      <Pressable
-                        onPress={() => pickStoreImage(1)}
-                        className="bg-white/[0.04] border border-white/[0.08] rounded-xl size-20 items-center justify-center"
-                      >
-                        {field.state.value[1] ? (
-                          <View className="size-20 rounded-xl overflow-hidden">
-                            {/* TODO: Display image */}
-                            <Text className="text-xs text-main">이미지 2</Text>
-                          </View>
-                        ) : (
-                          <Plus size={24} color="#919DA1" />
-                        )}
-                      </Pressable>
+            {appInfo?.storeImages && appInfo.storeImages.length > 0 && (
+              <View>
+                <Desc1 className="mb-2">상점 이미지</Desc1>
+                <View className="flex-row gap-3 flex-wrap">
+                  {appInfo.storeImages.map((imageUri, index) => (
+                    <View
+                      key={index}
+                      className="rounded-xl size-20 overflow-hidden bg-white/[0.04] border border-white/[0.08]"
+                    >
+                      <Image
+                        source={imageUri}
+                        style={{ width: 80, height: 80 }}
+                        contentFit="cover"
+                      />
                     </View>
-                    {field.state.meta.errors[0] && (
-                      <Desc1 className="text-error mt-1">
-                        {field.state.meta.errors[0].message}
-                      </Desc1>
-                    )}
-                  </>
-                )}
-              </form.Field>
-            </View>
+                  ))}
+                </View>
+              </View>
+            )}
           </View>
         </View>
 

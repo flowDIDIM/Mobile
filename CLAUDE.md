@@ -312,6 +312,46 @@ const handleNavigate = () => {
 - For programmatic colors: import from `@/design-system`
 - Custom font sizes follow the design system (e.g., `text-title-1`, `text-desc-2`)
 
+### Images and NativeWind Compatibility
+
+**CRITICAL: `expo-image` Image component is incompatible with NativeWind for width/height styles.**
+
+Due to a known compatibility issue between `expo-image` and NativeWind, the `Image` component from `expo-image` always renders with width and height of 0 when using Tailwind CSS classes for sizing. You **MUST** use inline `style` prop instead.
+
+**✅ CORRECT - Use inline style prop:**
+```tsx
+import { Image } from "expo-image";
+
+<Image
+  source={{ uri: "https://example.com/image.png" }}
+  style={{ width: "100%", height: "100%" }}
+  contentFit="cover"
+/>
+
+// Or with specific dimensions
+<Image
+  source={{ uri: "https://example.com/image.png" }}
+  style={{ width: 200, height: 200 }}
+  contentFit="cover"
+/>
+```
+
+**❌ INCORRECT - DO NOT use NativeWind classes for sizing:**
+```tsx
+// This will render with 0x0 dimensions
+<Image
+  source={{ uri: "https://example.com/image.png" }}
+  className="w-full h-full"
+  contentFit="cover"
+/>
+```
+
+**Important notes:**
+- You can still use NativeWind classes for other styles (rounded corners, opacity, etc.)
+- Only width and height must be set via the `style` prop
+- This limitation only applies to the `Image` component from `expo-image`
+- Other components work fine with NativeWind sizing classes
+
 ### Creating New Components
 When creating new UI components:
 1. Use **class-variance-authority (CVA)** for variant management

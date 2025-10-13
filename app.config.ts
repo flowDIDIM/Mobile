@@ -22,6 +22,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
+    permissions: ["INTERNET"],
   },
   web: {
     bundler: "metro",

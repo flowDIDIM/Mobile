@@ -19,36 +19,38 @@ import { colors } from "@/design-system";
 export default function CreateTrack() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{
+    packageName: string;
+    tracks: string;
+  }>();
   const bottomSheetRef = React.useRef<BottomSheet>(null);
 
   // Parse tracks from params
   const tracks: DropdownOption[] = useMemo(
     () =>
-      params.tracks
-        ? JSON.parse(params.tracks as string).map((track: any) => ({
-            label: track.name,
-            value: track.id,
-          }))
-        : [],
+      (JSON.parse(params.tracks) as string[]).map((trackName) => ({
+        label: trackName,
+        value: trackName,
+      })),
     [params.tracks],
   );
 
   const { isPending, mutate: validateTrackMutation } = useMutation(
     clientQuery.developer.validate.track.$post.mutationOptions({
       onSuccess: (data, input) => {
-        if (!data.isValid) {
-          // Show error bottom sheet
-          bottomSheetRef.current?.expand();
-          return;
-        }
-
-        // Navigate to info page with package and track info
+        // Navigate to info page with package, track, and app info
         router.push({
           pathname: "/developer/create/info",
           params: {
             packageName: input.json.packageName,
             trackId: input.json.trackId,
+            // Pass app info from API response
+            appInfo: JSON.stringify({
+              shortDescription: data.shortDescription,
+              icon: data.icon,
+              storeImages: data.storeImages,
+              detailedDescription: data.detailedDescription,
+            }),
           },
         });
       },

@@ -2,6 +2,7 @@ import { authClient } from "@/lib/auth-client";
 import { StatusBar, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Title3, Body3 } from "@/components/Typography";
+import React from "react";
 
 export default function Index() {
   const insets = useSafeAreaInsets();
@@ -40,8 +41,8 @@ export default function Index() {
       </View>
 
       <View className="flex-1 justify-center items-center px-5 gap-4">
-        <Body3 className="text-[20px] leading-[24px] mb-8">
-          역할을 선택해주세요 Devloper 한글 ㅎㅎㅎㅎ
+        <Body3 className="text-[18px] leading-[24px] mb-8">
+          역할을 선택해주세요
         </Body3>
 
         <TouchableOpacity
