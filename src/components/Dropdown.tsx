@@ -72,7 +72,7 @@ export function Dropdown({
             className,
           )}
         >
-          <Desc1 className={cn(selectedOption ? "" : "text-gray-500")}>
+          <Desc1 className={cn(selectedOption ? "text-main" : "text-gray-500")}>
             {displayText}
           </Desc1>
           <ChevronDown

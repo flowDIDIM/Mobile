@@ -9,6 +9,7 @@ import { Card } from "@/components/Card";
 import { Title3, Body3, Desc1 } from "@/components/Typography";
 import { clientQuery } from "@/lib/api-client";
 import { colors } from "@/design-system";
+import type { ImageContentPosition } from "expo-image/src/Image.types";
 
 export default function DeveloperIndex() {
   const insets = useSafeAreaInsets();
@@ -60,9 +61,8 @@ export default function DeveloperIndex() {
                   <View className="size-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/[0.08]">
                     <Image
                       source={{ uri: app.icon }}
-                      style={{ width: 48, height: 48 }}
+                      style={{ width: "100%", height: "100%" }}
                       contentFit="cover"
-                      transition={200}
                     />
                   </View>
                   <View className="flex-1">
@@ -73,16 +73,7 @@ export default function DeveloperIndex() {
 
                 {/* Payment Status */}
                 <View className="flex-row items-center gap-2">
-                  {app.paymentStatus === "COMPLETED" ? (
-                    <>
-                      <CheckCircle2
-                        size={16}
-                        color={colors.primary}
-                        strokeWidth={2}
-                      />
-                      <Desc1 className="text-primary">결제 완료</Desc1>
-                    </>
-                  ) : app.paymentStatus === "PENDING" ? (
+                  {app.paymentStatus === "PENDING" ? (
                     <>
                       <Clock
                         size={16}
@@ -91,12 +82,12 @@ export default function DeveloperIndex() {
                       />
                       <Desc1 className="text-gray-500">결제 대기 중</Desc1>
                     </>
-                  ) : (
+                  ) : app.paymentStatus === "CANCELED" ? (
                     <>
                       <XCircle size={16} color={colors.error} strokeWidth={2} />
                       <Desc1 className="text-error">결제 취소됨</Desc1>
                     </>
-                  )}
+                  ) : null}
                 </View>
               </View>
             ))}

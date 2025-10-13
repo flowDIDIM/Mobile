@@ -50,15 +50,12 @@ export default function CreateInfo() {
   const { mutate: createPayment } = useMutation(
     clientQuery.developer.payment.create.$post.mutationOptions({
       onSuccess: async (data) => {
-        if ("demo" in data && data.demo) {
-          // Demo mode: directly navigate to developer page
-          router.replace("/developer");
-        } else if ("paymentUrl" in data && data.paymentUrl) {
-          // Open payment URL in browser
+        // Open payment URL in browser
+        if ("paymentUrl" in data && data.paymentUrl) {
           await WebBrowser.openBrowserAsync(data.paymentUrl);
-          // Navigate to developer page after opening browser
-          router.replace("/developer");
         }
+
+        router.replace("/developer");
       },
       onError: (error) => {
         console.error("Payment creation failed:", error);
@@ -145,7 +142,7 @@ export default function CreateInfo() {
                 <View className="rounded-xl size-20 overflow-hidden bg-white/[0.04] border border-white/[0.08]">
                   <Image
                     source={{ uri: appInfo.icon }}
-                    style={{ width: 80, height: 80 }}
+                    style={{ width: "100%", height: "100%" }}
                     contentFit="cover"
                     transition={200}
                     placeholder="blur"
@@ -166,8 +163,9 @@ export default function CreateInfo() {
                     >
                       <Image
                         source={imageUri}
-                        style={{ width: 80, height: 80 }}
+                        style={{ width: "100%", height: "100%" }}
                         contentFit="cover"
+                        contentPosition={"top"}
                       />
                     </View>
                   ))}

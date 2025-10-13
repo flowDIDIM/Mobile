@@ -107,7 +107,6 @@ export default function CreateTrack() {
                 options={tracks}
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="ex)com.didim.~"
                 disabled={isPending}
               />
             )}

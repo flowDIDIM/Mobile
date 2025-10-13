@@ -14,14 +14,14 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { clientQuery } from "@/lib/api-client";
-import { Title2, Title3, Desc1 } from "@/components/Typography";
+import { Desc1, Title2, Title3 } from "@/components/Typography";
 
 const packageSchema = z.object({
   packageName: z
     .string()
     .min(1, "패키지명을 입력해주세요")
     .regex(
-      /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/,
+      /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/,
       "올바른 Android 패키지명 형식이 아닙니다\n(예: com.company.app)",
     ),
 });
@@ -43,7 +43,30 @@ export default function CreatePackage() {
           },
         });
       },
-      onError: () => {
+      onError: (error) => {
+        console.log(error.cause);
+        if (
+          error.cause &&
+          typeof error.cause === "object" &&
+          "_tag" in error.cause &&
+          "error" in error.cause
+        ) {
+          if (error.cause._tag === "InvalidPackageNameError") {
+            const errorMessage =
+              typeof error.cause.error === "string"
+                ? error.cause.error
+                : "유효하지 않은 패키지명입니다";
+            form.setErrorMap({
+              onChange: {
+                fields: {
+                  packageName: { message: errorMessage },
+                },
+              },
+            });
+            return;
+          }
+        }
+
         bottomSheetRef.current?.expand();
       },
     }),

@@ -95,7 +95,9 @@ function createHcQueryEndpoint<TEndpoint extends ClientRequestEndpoint>(
 
           if (!res.ok) {
             console.log(`<-- ERROR ${res.status} ${JSON.stringify(json)}`);
-            throw new Error(`Request failed with status ${res.status}`);
+            throw new Error(`Request failed with status ${res.status}`, {
+              cause: json,
+            });
           }
 
           console.log(`<-- ${res.status}`, JSON.stringify(json));
