@@ -46,6 +46,7 @@ export default function CreateTrack() {
             trackId: input.json.trackId,
             // Pass app info from API response
             appInfo: JSON.stringify({
+              title: data.title,
               shortDescription: data.shortDescription,
               icon: data.icon,
               storeImages: data.storeImages,

@@ -3,11 +3,14 @@ import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { Image } from "expo-image";
+import * as WebBrowser from "expo-web-browser";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import { Title3, Desc1 } from "@/components/Typography";
+import { clientQuery } from "@/lib/api-client";
 
 const PAYMENT_PRESETS = [10000, 30000, 50000];
 
@@ -24,6 +27,7 @@ const infoSchema = z.object({
 
 export default function CreateInfo() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const params = useLocalSearchParams<{
     packageName: string;
     trackId: string;
@@ -34,12 +38,33 @@ export default function CreateInfo() {
   const appInfo = useMemo(() => {
     if (!params.appInfo) return null;
     return JSON.parse(params.appInfo) as {
+      title: string;
       shortDescription: string;
       icon: string;
       storeImages: string[];
       detailedDescription: string;
     };
   }, [params.appInfo]);
+
+  // Payment mutation
+  const { mutate: createPayment } = useMutation(
+    clientQuery.developer.payment.create.$post.mutationOptions({
+      onSuccess: async (data) => {
+        if ("demo" in data && data.demo) {
+          // Demo mode: directly navigate to developer page
+          router.replace("/developer");
+        } else if ("paymentUrl" in data && data.paymentUrl) {
+          // Open payment URL in browser
+          await WebBrowser.openBrowserAsync(data.paymentUrl);
+          // Navigate to developer page after opening browser
+          router.replace("/developer");
+        }
+      },
+      onError: (error) => {
+        console.error("Payment creation failed:", error);
+      },
+    }),
+  );
 
   const form = useForm({
     defaultValues: {
@@ -51,10 +76,23 @@ export default function CreateInfo() {
       onChange: infoSchema,
     },
     onSubmit: async ({ value }) => {
-      // TODO: Submit form data to API
-      console.log("Form submitted:", value);
+      const amount = parseInt(value.paymentAmount, 10);
 
-      // Navigate to payment page
+      createPayment({
+        json: {
+          application: {
+            developerId: "",
+            name: appInfo?.title || "",
+            packageName: params.packageName,
+            trackName: params.trackId,
+            shortDescription: value.shortDescription,
+            fullDescription: value.detailedDescription,
+            icon: appInfo?.icon || "",
+            images: appInfo?.storeImages || [],
+          },
+          amount,
+        },
+      });
     },
   });
 
