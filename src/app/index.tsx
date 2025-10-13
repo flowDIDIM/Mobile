@@ -1,10 +1,8 @@
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "expo-router";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const handleDeveloperLogin = async () => {
@@ -25,8 +23,6 @@ export default function Index() {
         provider: "google",
         callbackURL: "/tester",
       });
-      // After successful login, replace to prevent going back to role selection
-      router.replace("/tester");
     } catch (error) {
       console.error("Google login failed:", error);
     }

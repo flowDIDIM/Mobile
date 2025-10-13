@@ -37,12 +37,6 @@ export default function CreateLayout() {
           title: "정보 입력",
         }}
       />
-      <Stack.Screen
-        name="payment"
-        options={{
-          title: "결제",
-        }}
-      />
     </Stack>
   );
 }

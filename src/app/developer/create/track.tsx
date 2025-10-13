@@ -36,7 +36,7 @@ export default function CreateTrack() {
   const { isPending, mutate: validateTrackMutation } = useMutation(
     clientQuery.developer.validate.track.$post.mutationOptions({
       onSuccess: (data, input) => {
-        if (!data.hasGroups) {
+        if (!data.isValid) {
           // Show error bottom sheet
           bottomSheetRef.current?.expand();
           return;
