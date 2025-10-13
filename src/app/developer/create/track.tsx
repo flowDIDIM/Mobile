@@ -7,6 +7,7 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { Dropdown, type DropdownOption } from "@/components/Dropdown";
 import { Button } from "@/components/Button";
+import { Title3, Title2 } from "@/components/Typography";
 import BottomSheet, {
   BottomSheetView,
   BottomSheetBackdrop,
@@ -96,7 +97,7 @@ export default function CreateTrack() {
       {/* Content */}
       <View className="flex-1 px-7 pt-14">
         <View className="py-2 gap-3">
-          <Text className="text-main text-title-3">트랙을 선택해 주세요.</Text>
+          <Title3>트랙을 선택해 주세요.</Title3>
           <form.Field name="trackId">
             {(field) => (
               <Dropdown
@@ -149,9 +150,9 @@ export default function CreateTrack() {
         backdropComponent={renderBackdrop}
       >
         <BottomSheetView className="flex-1 px-5 py-12 pb-8">
-          <Text className="text-main text-title-2 text-center">
+          <Title2 className="text-center">
             그룹스 이메일의 추가되어 있지 않습니다
-          </Text>
+          </Title2>
           <View className="items-center justify-center">
             <Text className="text-error text-[128px]">?</Text>
           </View>

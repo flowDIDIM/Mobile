@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -14,6 +14,7 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { clientQuery } from "@/lib/api-client";
+import { Title2, Title3, Desc1 } from "@/components/Typography";
 
 const packageSchema = z.object({
   packageName: z
@@ -84,9 +85,7 @@ export default function CreatePackage() {
       {/* Content */}
       <View className="flex-1 px-7 pt-14">
         <View className="py-2 gap-3">
-          <Text className="text-main text-title-3">
-            패키지 명을 입력해 주세요.
-          </Text>
+          <Title3>패키지 명을 입력해 주세요.</Title3>
           <form.Field name="packageName">
             {(field) => (
               <>
@@ -100,9 +99,9 @@ export default function CreatePackage() {
                   }
                 />
                 {field.state.meta.errors[0] && (
-                  <Text className="text-error text-desc-1 mt-1">
+                  <Desc1 className="text-error">
                     {field.state.meta.errors[0].message}
-                  </Text>
+                  </Desc1>
                 )}
               </>
             )}
@@ -149,11 +148,9 @@ export default function CreatePackage() {
       >
         <BottomSheetView className="flex-1 items-center justify-between px-5 py-5">
           <View className="flex-1 items-center justify-center gap-6">
-            <Text className="text-main text-title-2 text-center">
-              트랙이 존재하지 않습니다
-            </Text>
+            <Title2 className="text-center">트랙이 존재하지 않습니다</Title2>
             <View className="w-24 h-24 items-center justify-center">
-              <Text className="text-error text-[64px]">?</Text>
+              <Title3 className="text-error text-[64px]">?</Title3>
             </View>
           </View>
           <Button

@@ -8,6 +8,7 @@ import { z } from "zod";
 import * as ImagePicker from "expo-image-picker";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
+import { Title3, Desc1 } from "@/components/Typography";
 import { Upload, Plus } from "lucide-react-native";
 import { clientQuery } from "@/lib/api-client";
 
@@ -118,7 +119,7 @@ export default function CreateInfo() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="text-main text-title-3">로딩 중...</Text>
+        <Title3>로딩 중...</Title3>
       </View>
     );
   }
@@ -135,7 +136,7 @@ export default function CreateInfo() {
       >
         {/* 1. 한 줄 소개 */}
         <View className="py-2 gap-3">
-          <Text className="text-main text-title-3">1. 한 줄 소개</Text>
+          <Title3>1. 한 줄 소개</Title3>
           <form.Field name="shortDescription">
             {(field) => (
               <>
@@ -147,10 +148,10 @@ export default function CreateInfo() {
                     field.state.meta.errors.length > 0 ? "error" : "default"
                   }
                 />
-                {field.state.meta.errors.length > 0 && (
-                  <Text className="text-error text-desc-1 mt-1">
+                {field.state.meta.errors[0] && (
+                  <Desc1 className="text-error mt-1">
                     {field.state.meta.errors[0].message}
-                  </Text>
+                  </Desc1>
                 )}
               </>
             )}
@@ -159,11 +160,11 @@ export default function CreateInfo() {
 
         {/* 2. 이미지 */}
         <View className="py-2 gap-3 mt-6">
-          <Text className="text-main text-title-3">2. 이미지</Text>
+          <Title3>2. 이미지</Title3>
           <View className="gap-3">
             {/* 아이콘 */}
             <View>
-              <Text className="text-sub text-desc-1 mb-2">아이콘</Text>
+              <Desc1 className="mb-2">아이콘</Desc1>
               <form.Field name="icon">
                 {(field) => (
                   <>
@@ -184,10 +185,10 @@ export default function CreateInfo() {
                         <Upload size={24} color="#919DA1" />
                       )}
                     </Pressable>
-                    {field.state.meta.errors.length > 0 && (
-                      <Text className="text-error text-desc-1 mt-1">
+                    {field.state.meta.errors[0] && (
+                      <Desc1 className="text-error mt-1">
                         {field.state.meta.errors[0].message}
-                      </Text>
+                      </Desc1>
                     )}
                   </>
                 )}
@@ -196,7 +197,7 @@ export default function CreateInfo() {
 
             {/* 상점 이미지 */}
             <View>
-              <Text className="text-sub text-desc-1 mb-2">상점 이미지</Text>
+              <Desc1 className="mb-2">상점 이미지</Desc1>
               <form.Field name="storeImages">
                 {(field) => (
                   <>
@@ -234,10 +235,10 @@ export default function CreateInfo() {
                         )}
                       </Pressable>
                     </View>
-                    {field.state.meta.errors.length > 0 && (
-                      <Text className="text-error text-desc-1 mt-1">
+                    {field.state.meta.errors[0] && (
+                      <Desc1 className="text-error mt-1">
                         {field.state.meta.errors[0].message}
-                      </Text>
+                      </Desc1>
                     )}
                   </>
                 )}
@@ -248,7 +249,7 @@ export default function CreateInfo() {
 
         {/* 3. 상세 설명 */}
         <View className="py-2 gap-3 mt-6">
-          <Text className="text-main text-title-3">3. 상세 설명</Text>
+          <Title3>3. 상세 설명</Title3>
           <form.Field name="detailedDescription">
             {(field) => (
               <>
@@ -273,10 +274,10 @@ export default function CreateInfo() {
                     {field.state.value.length} / 1,000
                   </Text>
                 </View>
-                {field.state.meta.errors.length > 0 && (
-                  <Text className="text-error text-desc-1 mt-1">
+                {field.state.meta.errors[0] && (
+                  <Desc1 className="text-error mt-1">
                     {field.state.meta.errors[0].message}
-                  </Text>
+                  </Desc1>
                 )}
               </>
             )}
@@ -285,7 +286,7 @@ export default function CreateInfo() {
 
         {/* 4. 결제금액 입력 */}
         <View className="py-2 gap-3 mt-6">
-          <Text className="text-main text-title-3">4. 결제금액 입력</Text>
+          <Title3>4. 결제금액 입력</Title3>
 
           {/* Preset buttons */}
           <View className="flex-row gap-2">
@@ -295,9 +296,7 @@ export default function CreateInfo() {
                 onPress={() => setPaymentPreset(preset)}
                 className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded h-9 items-center justify-center"
               >
-                <Text className="text-desc-1 text-main">
-                  {(preset / 10000).toFixed(0)}만원
-                </Text>
+                <Desc1>{(preset / 10000).toFixed(0)}만원</Desc1>
               </Pressable>
             ))}
           </View>
@@ -320,12 +319,12 @@ export default function CreateInfo() {
                     onChangeText={field.handleChange}
                     keyboardType="numeric"
                   />
-                  <Text className="text-desc-1 text-main">원</Text>
+                  <Desc1>원</Desc1>
                 </View>
-                {field.state.meta.errors.length > 0 && (
-                  <Text className="text-error text-desc-1 mt-1">
+                {field.state.meta.errors[0] && (
+                  <Desc1 className="text-error mt-1">
                     {field.state.meta.errors[0].message}
-                  </Text>
+                  </Desc1>
                 )}
               </>
             )}
@@ -343,7 +342,7 @@ export default function CreateInfo() {
 
         {/* 5. 결제정보 */}
         <View className="py-2 gap-3 mt-6">
-          <Text className="text-main text-title-3">5. 결제정보</Text>
+          <Title3>5. 결제정보</Title3>
           <form.Subscribe
             selector={(state) => ({
               paymentAmount: state.values.paymentAmount,
@@ -354,10 +353,10 @@ export default function CreateInfo() {
 
               return (
                 <View className="bg-white/[0.04] border border-white/[0.08] rounded h-11 px-3 flex-row items-center justify-between">
-                  <Text className="text-desc-1 text-sub">최종 결제 금액</Text>
-                  <Text className="text-desc-1 text-main font-semibold">
+                  <Desc1>최종 결제 금액</Desc1>
+                  <Desc1 className="font-semibold">
                     {amount.toLocaleString()}원
-                  </Text>
+                  </Desc1>
                 </View>
               );
             }}

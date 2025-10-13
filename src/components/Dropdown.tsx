@@ -1,15 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  FlatList,
-  Modal,
-  type ViewProps,
-} from "react-native";
+import { View, Pressable, FlatList, Modal, type ViewProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react-native";
+import { Desc1 } from "./Typography";
 
 const dropdownVariants = cva(
   "bg-white/[0.04] border border-white/[0.08] rounded h-11 px-3 flex-row items-center justify-between",
@@ -78,14 +72,9 @@ export function Dropdown({
             className,
           )}
         >
-          <Text
-            className={cn(
-              "text-desc-1",
-              selectedOption ? "text-main" : "text-gray-500",
-            )}
-          >
+          <Desc1 className={cn(selectedOption ? "" : "text-gray-500")}>
             {displayText}
-          </Text>
+          </Desc1>
           <ChevronDown
             size={20}
             color={selectedOption ? "#F1F3F3" : "#919DA1"}
@@ -113,14 +102,11 @@ export function Dropdown({
                     onPress={() => handleSelect(item.value)}
                     className="px-4 py-3 border-b border-white/[0.08]"
                   >
-                    <Text
-                      className={cn(
-                        "text-desc-1",
-                        item.value === value ? "text-primary" : "text-main",
-                      )}
+                    <Desc1
+                      className={cn(item.value === value ? "text-primary" : "")}
                     >
                       {item.label}
-                    </Text>
+                    </Desc1>
                   </Pressable>
                 )}
                 className="bg-gray-800 rounded-lg border border-white/[0.08] max-h-[300px]"

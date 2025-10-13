@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, Pressable, type PressableProps } from "react-native";
+import { View, Pressable, type PressableProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { Title4, Desc3, ButtonText } from "./Typography";
 
 const cardVariants = cva(
   "bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 flex-row items-center justify-between h-20",
@@ -66,21 +67,21 @@ export function Card({
         {/* App Info */}
         <View className="h-12 justify-between flex-1">
           <View className="gap-0.5">
-            <Text className="text-main text-title-4">{appName}</Text>
-            {description && (
-              <Text className="text-sub text-desc-3">{description}</Text>
-            )}
+            <Title4>{appName}</Title4>
+            {description && <Desc3>{description}</Desc3>}
           </View>
-          <Text className="text-sub text-desc-3">
+          <Desc3>
             {points !== undefined && `획득 포인트 ${points}P · `}테스터 수{" "}
             {currentTesters}/{maxTesters}
-          </Text>
+          </Desc3>
         </View>
       </View>
 
       {/* Action Button */}
       <Pressable onPress={onActionPress}>
-        <Text className={actionTextVariants({ variant })}>{actionText}</Text>
+        <ButtonText className={actionTextVariants({ variant })}>
+          {actionText}
+        </ButtonText>
       </Pressable>
     </Pressable>
   );

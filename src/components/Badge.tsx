@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, type ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { ButtonText } from "./Typography";
 
 const badgeVariants = cva(
   "flex-row items-center justify-center px-1.5 py-0.5 rounded-full gap-2.5",
@@ -18,7 +19,7 @@ const badgeVariants = cva(
   },
 );
 
-const badgeTextVariants = cva("text-button text-center", {
+const badgeTextVariants = cva("text-center", {
   variants: {
     variant: {
       done: "text-primary",
@@ -43,7 +44,9 @@ export function Badge({
 }: BadgeProps) {
   return (
     <View className={cn(badgeVariants({ variant }), className)} {...props}>
-      <Text className={badgeTextVariants({ variant })}>{label}</Text>
+      <ButtonText className={badgeTextVariants({ variant })}>
+        {label}
+      </ButtonText>
     </View>
   );
 }

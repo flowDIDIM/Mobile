@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, Modal as RNModal, type ModalProps } from "react-native";
+import { View, Modal as RNModal, type ModalProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Button } from "./Button";
+import { Title1 } from "./Typography";
 
 const modalVariants = cva("bg-gray-800 rounded-t-lg overflow-hidden", {
   variants: {
@@ -53,9 +54,7 @@ export function Modal({
           </View>
 
           {/* Title */}
-          <Text className="text-main text-title-1 text-center mt-16">
-            {title}
-          </Text>
+          <Title1 className="text-center mt-16">{title}</Title1>
 
           {/* Content */}
           <View className="flex-1 items-center justify-center px-5">

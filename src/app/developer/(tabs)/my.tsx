@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Settings, ChevronRight } from "lucide-react-native";
 import { BoxField } from "@/components/BoxField";
+import { Title3 } from "@/components/Typography";
 
 export default function MyPage() {
   const insets = useSafeAreaInsets();
@@ -18,7 +19,7 @@ export default function MyPage() {
       >
         {/* Top Navigation */}
         <View className="h-13 items-center justify-center relative">
-          <Text className="text-main text-title-3">마이페이지</Text>
+          <Title3>마이페이지</Title3>
           <Pressable className="absolute right-5">
             <Settings size={24} color="#F1F3F3" strokeWidth={2} />
           </Pressable>
@@ -27,7 +28,7 @@ export default function MyPage() {
         {/* User Info Section */}
         <View className="px-5 pt-0">
           <View className="items-center py-2">
-            <Text className="text-main text-title-3">유저정보</Text>
+            <Title3>유저정보</Title3>
           </View>
 
           {/* Email */}
@@ -42,19 +43,19 @@ export default function MyPage() {
         <View className="px-7 pt-3 gap-2">
           {/* Payment History */}
           <Pressable className="bg-primary h-11 rounded px-3 flex-row items-center justify-between">
-            <Text className="text-main text-title-3">결제 내역</Text>
+            <Title3>결제 내역</Title3>
             <ChevronRight size={16.67} color="#F1F3F3" strokeWidth={2} />
           </Pressable>
 
           {/* Inquiry */}
           <Pressable className="bg-white/[0.08] h-11 rounded px-3 flex-row items-center justify-between">
-            <Text className="text-main text-title-3">문의</Text>
+            <Title3>문의</Title3>
             <ChevronRight size={16.67} color="#F1F3F3" strokeWidth={2} />
           </Pressable>
 
           {/* Policy */}
           <Pressable className="bg-white/[0.08] h-11 rounded px-3 flex-row items-center justify-between">
-            <Text className="text-main text-title-3">정책</Text>
+            <Title3>정책</Title3>
             <ChevronRight size={16.67} color="#F1F3F3" strokeWidth={2} />
           </Pressable>
         </View>

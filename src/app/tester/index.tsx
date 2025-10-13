@@ -7,6 +7,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  Title3,
+  Title4,
+  Desc2,
+  Desc3,
+  ButtonText,
+} from "@/components/Typography";
 
 interface AppCardProps {
   appName: string;
@@ -29,21 +36,21 @@ function AppCard({
         <View className="bg-[#f1f3f3] rounded-lg w-14 h-14" />
         <View className="h-12 w-32 justify-between">
           <View className="gap-0.5">
-            <Text className="text-[#f1f3f3] text-[12px] font-semibold tracking-[-0.24px]">
+            <Title4 className="text-[#f1f3f3] tracking-[-0.24px]">
               {appName}
-            </Text>
-            <Text className="text-[#f1f3f3] text-[10px] tracking-[-0.2px]">
+            </Title4>
+            <Desc2 className="text-[#f1f3f3] tracking-[-0.2px]">
               {description}
-            </Text>
+            </Desc2>
           </View>
-          <Text className="text-[#919da1] text-[8px] tracking-[-0.16px]">
+          <Desc3 className="text-[#919da1] tracking-[-0.16px]">
             획득 포인트 {points}P · 테스터 정원 {currentTesters}/{maxTesters}
-          </Text>
+          </Desc3>
         </View>
       </View>
-      <Text className="text-[#4f96ff] text-[10px] font-semibold tracking-[-0.2px]">
+      <ButtonText className="text-[#4f96ff] tracking-[-0.2px]">
         참여하기
-      </Text>
+      </ButtonText>
     </View>
   );
 }
@@ -57,13 +64,13 @@ function TestAppItem({ appName, points }: TestAppItemProps) {
   return (
     <View className="flex-1 gap-1.5 items-center">
       <View className="bg-[#f1f3f3] h-[53.8px] rounded-lg w-full" />
-      <Text className="text-[#f1f3f3] text-[10px] font-semibold tracking-[0.4px] text-center w-full">
+      <ButtonText className="text-[#f1f3f3] tracking-[0.4px] text-center w-full">
         {appName}
-      </Text>
+      </ButtonText>
       <View className="bg-[#f1f3f3] rounded-full px-0 py-0.5 w-[38px] items-center justify-center">
-        <Text className="text-[#121316] text-[10px] font-semibold tracking-[0.4px] text-center">
+        <ButtonText className="text-[#121316] tracking-[0.4px] text-center">
           {points}p
-        </Text>
+        </ButtonText>
       </View>
     </View>
   );
@@ -102,18 +109,16 @@ export default function Tester() {
         className="h-[52px] justify-center items-center"
         style={{ marginTop: insets.top }}
       >
-        <Text className="text-[#f1f3f3] text-[14px] font-semibold tracking-[-0.28px]">
-          홈
-        </Text>
+        <Title3 className="text-[#f1f3f3] tracking-[-0.28px]">홈</Title3>
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* 나의 포인트 */}
         <View className="mx-5 mt-3 rounded-xl overflow-hidden">
           <View className="py-2">
-            <Text className="text-[#f1f3f3] text-[14px] font-semibold tracking-[-0.28px]">
+            <Title3 className="text-[#f1f3f3] tracking-[-0.28px]">
               나의 포인트
-            </Text>
+            </Title3>
           </View>
           <View className="flex-row gap-1 items-center px-2 py-1">
             <Ionicons name="logo-bitcoin" size={24} color="#f1f3f3" />
@@ -129,9 +134,9 @@ export default function Tester() {
         {/* 오늘 미완료 테스트 */}
         <View className="mx-5 mt-3 rounded-xl overflow-hidden">
           <View className="py-2">
-            <Text className="text-[#f1f3f3] text-[14px] font-semibold tracking-[-0.28px]">
+            <Title3 className="text-[#f1f3f3] tracking-[-0.28px]">
               오늘 미완료 테스트
-            </Text>
+            </Title3>
           </View>
           <View className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-[20px] px-2 py-5 gap-3 items-center">
             <View className="gap-6 w-full">
@@ -159,9 +164,9 @@ export default function Tester() {
         {/* 최근 추가된 앱 */}
         <View className="mx-5 mt-3 items-center">
           <View className="py-2 w-full">
-            <Text className="text-[#f1f3f3] text-[14px] font-semibold tracking-[-0.28px]">
+            <Title3 className="text-[#f1f3f3] tracking-[-0.28px]">
               최근 추가된 앱
-            </Text>
+            </Title3>
           </View>
           <View className="gap-2 w-[319px]">
             <AppCard
@@ -191,9 +196,9 @@ export default function Tester() {
         {/* 곧 마감되는 앱 */}
         <View className="mx-5 mt-3 items-center mb-24">
           <View className="py-2 w-full">
-            <Text className="text-[#f1f3f3] text-[14px] font-semibold tracking-[-0.28px]">
+            <Title3 className="text-[#f1f3f3] tracking-[-0.28px]">
               곧 마감되는 앱
-            </Text>
+            </Title3>
           </View>
           <View className="gap-2 w-[319px]">
             <AppCard

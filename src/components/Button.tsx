@@ -1,7 +1,8 @@
 import React from "react";
-import { Pressable, Text, type PressableProps } from "react-native";
+import { Pressable, type PressableProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { Title3 } from "./Typography";
 
 const buttonVariants = cva(
   "flex-row items-center justify-center h-[41px] px-2.5 rounded-lg gap-2.5",
@@ -42,7 +43,7 @@ export function Button({
       disabled={disabled}
       {...props}
     >
-      <Text className="text-main text-title-3 text-center">{children}</Text>
+      <Title3 className="text-center">{children}</Title3>
     </Pressable>
   );
 }

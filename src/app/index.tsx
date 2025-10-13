@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth-client";
-import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { StatusBar, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Title3, Body3 } from "@/components/Typography";
 
 export default function Index() {
   const insets = useSafeAreaInsets();
@@ -35,22 +36,20 @@ export default function Index() {
         className="h-11 justify-center items-center"
         style={{ marginTop: insets.top }}
       >
-        <Text className="text-gray-50 text-title-3">DIDIM</Text>
+        <Title3>DIDIM</Title3>
       </View>
 
       <View className="flex-1 justify-center items-center px-5 gap-4">
-        <Text className="text-gray-50 text-[20px] leading-[24px] mb-8">
-          역할을 선택해주세요
-        </Text>
+        <Body3 className="text-[20px] leading-[24px] mb-8">
+          역할을 선택해주세요 Devloper 한글 ㅎㅎㅎㅎ
+        </Body3>
 
         <TouchableOpacity
           className="bg-secondary rounded-lg px-6 py-4 w-full max-w-xs"
           activeOpacity={0.8}
           onPress={handleDeveloperLogin}
         >
-          <Text className="text-gray-50 text-title-3 text-center">
-            개발자 (Developer)
-          </Text>
+          <Title3 className="text-center">개발자 (Developer)</Title3>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -58,9 +57,7 @@ export default function Index() {
           activeOpacity={0.8}
           onPress={handleTesterLogin}
         >
-          <Text className="text-gray-50 text-title-3 text-center">
-            테스터 (Tester)
-          </Text>
+          <Title3 className="text-center">테스터 (Tester)</Title3>
         </TouchableOpacity>
       </View>
     </View>
