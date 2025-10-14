@@ -6,7 +6,13 @@ import { Plus, CheckCircle2, Clock, XCircle } from "lucide-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Card } from "@/components/Card";
-import { Title3, Body3, Desc1 } from "@/components/Typography";
+import {
+  Title3,
+  Title4,
+  Body3,
+  Desc3,
+  ButtonText,
+} from "@/components/Typography";
 import { clientQuery } from "@/lib/api-client";
 import { colors } from "@/design-system";
 import type { ImageContentPosition } from "expo-image/src/Image.types";
@@ -35,13 +41,6 @@ export default function DeveloperIndex() {
         {/* Top Navigation */}
         <View className="h-13 items-center justify-center relative">
           <Title3>{hasApps ? "등록한 앱" : "앱"}</Title3>
-          {hasApps && (
-            <Link href="/developer/create/package" asChild>
-              <Pressable className="absolute right-5">
-                <Plus size={24} color="#F1F3F3" strokeWidth={2} />
-              </Pressable>
-            </Link>
-          )}
         </View>
 
         {/* Content */}
@@ -52,45 +51,49 @@ export default function DeveloperIndex() {
         ) : hasApps ? (
           <View className="px-7 pt-4 gap-3">
             {apps.map((app) => (
-              <View
-                key={app.id}
-                className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-4"
-              >
-                {/* App Header with Icon */}
-                <View className="flex-row items-center gap-3 mb-3">
-                  <View className="size-12 rounded-lg overflow-hidden bg-white/[0.04] border border-white/[0.08]">
-                    <Image
-                      source={{ uri: app.icon }}
-                      style={{ width: "100%", height: "100%" }}
-                      contentFit="cover"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Title3>{app.name}</Title3>
-                    <Desc1 className="text-sub">{app.shortDescription}</Desc1>
-                  </View>
-                </View>
-
-                {/* Payment Status */}
-                <View className="flex-row items-center gap-2">
-                  {app.paymentStatus === "PENDING" ? (
-                    <>
-                      <Clock
-                        size={16}
-                        color={colors.gray["500"]}
-                        strokeWidth={2}
+              <Link key={app.id} href={`/developer/app/${app.id}`} asChild>
+                <Pressable className="bg-white/[0.04] border border-white/[0.08] rounded-xl h-20 flex-row items-center justify-between px-3">
+                  {/* Left side: Icon and App Info */}
+                  <View className="flex-row items-center gap-3 flex-1">
+                    <View className="size-14 rounded-lg overflow-hidden bg-gray-50">
+                      <Image
+                        source={{ uri: app.icon }}
+                        style={{ width: "100%", height: "100%" }}
+                        contentFit="cover"
                       />
-                      <Desc1 className="text-gray-500">결제 대기 중</Desc1>
-                    </>
-                  ) : app.paymentStatus === "CANCELED" ? (
-                    <>
-                      <XCircle size={16} color={colors.error} strokeWidth={2} />
-                      <Desc1 className="text-error">결제 취소됨</Desc1>
-                    </>
-                  ) : null}
-                </View>
-              </View>
+                    </View>
+                    <View className="flex-col justify-center gap-0.5 h-12 flex-1">
+                      <Title4 numberOfLines={1} ellipsizeMode="tail">
+                        {app.name}
+                      </Title4>
+                      <Desc3 className="text-sub">테스터 수 2/20</Desc3>
+                    </View>
+                  </View>
+
+                  {/* Right side: Status/Action Button */}
+                  <View>
+                    {app.paymentStatus === "PENDING" ||
+                    app.paymentStatus === "COMPLETED" ? (
+                      <ButtonText className="text-primary text-[10px]">
+                        편집
+                      </ButtonText>
+                    ) : (
+                      <ButtonText className="text-sub text-[10px]">
+                        테스트 종료
+                      </ButtonText>
+                    )}
+                  </View>
+                </Pressable>
+              </Link>
             ))}
+
+            {/* Add App Button */}
+            <Link href="/developer/create/package" asChild>
+              <Pressable className="bg-primary rounded-lg py-3 flex-row items-center justify-center gap-2">
+                <Plus size={20} color="#F1F3F3" strokeWidth={2.5} />
+                <Title3>등록하기</Title3>
+              </Pressable>
+            </Link>
           </View>
         ) : (
           <View className="items-center justify-center flex-1 px-5">
