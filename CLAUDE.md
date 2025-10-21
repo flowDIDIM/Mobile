@@ -91,51 +91,157 @@ import { Home, User, Search } from "lucide-react-native";
 #### TanStack Query with Hono RPC
 The app uses **TanStack Query v5** with **Hono RPC client** for type-safe server state management:
 - QueryClient is configured in `src/app/_layout.tsx` with retry and refetch options
-- **ALWAYS use `clientQuery` from `@/lib/api-client`** instead of manual `queryFn`/`mutationFn`
-- `clientQuery` automatically handles queryKey, queryFn, mutationKey, and mutationFn
-- Destructure the hook when you only use one query/mutation per component
-- Use `useMutation` with `clientQuery.path.to.endpoint.$post.mutationOptions()` for mutations
-- Use `useQuery` with `clientQuery.path.to.endpoint.$post.queryOptions()` for queries
+- **ALWAYS use `useHonoQuery` and `useHonoMutation` hooks from `@/lib/hono-rpc`** for type-safe API calls
+- These hooks automatically handle queryKey, queryFn, mutationKey, and mutationFn
+- Import `client` from `@/lib/api-client` and pass the endpoint along with the HTTP method
+- The hooks provide full TypeScript inference for request/response types
 
-**Mutation Example:**
+**Available Hooks:**
+- `useHonoQuery` - For GET requests and data fetching
+- `useHonoMutation` - For POST/PUT/DELETE requests that modify data
+- `useHonoSuspenseQuery` - For queries that use React Suspense
+- `queryOptions` - For creating reusable query options
+- `mutationOptions` - For creating reusable mutation options
+
+**Query Example (GET requests):**
 ```tsx
-import { useMutation } from "@tanstack/react-query";
-import { clientQuery } from "@/lib/api-client";
+import { useHonoQuery } from "@/lib/hono-rpc";
+import { client } from "@/lib/api-client";
 
-// ✅ CORRECT: Destructure and use clientQuery
-const { isPending, mutate } = useMutation(
-  clientQuery.developer.validate.package.$post.mutationOptions({
-    onSuccess: (data, input) => {
-      // data: response from server
-      // input: request input including { json: {...} }
-      console.log(data);
-    },
-    onError: (error) => {
-      // Handle error
-    },
-  }),
+// ✅ CORRECT: Simple query without parameters
+const { data, isLoading, error } = useHonoQuery(client.developer.app, "$get");
+
+// ✅ CORRECT: Query with parameters (query params, path params, etc.)
+const { data, isLoading } = useHonoQuery(
+  client.developer.app.detail,
+  "$get",
+  {
+    param: { id: "123" }, // Path parameters
+    query: { status: "active" }, // Query string parameters
+  },
+  {
+    // TanStack Query options
+    enabled: !!userId, // Conditional fetching
+    refetchInterval: 5000, // Polling
+    select: (data) => data.apps, // Transform data
+  }
 );
 
-// Use the mutation
-mutate({ json: { packageName: "com.example.app" } });
+// Access typed data
+const apps = data?.apps || [];
 ```
 
-**Query Example:**
+**Mutation Example (POST/PUT/DELETE requests):**
 ```tsx
-import { useQuery } from "@tanstack/react-query";
-import { clientQuery } from "@/lib/api-client";
+import { useHonoMutation } from "@/lib/hono-rpc";
+import { client } from "@/lib/api-client";
 
-// ✅ CORRECT: Use clientQuery with queryOptions
-const { data, isLoading } = useQuery(
-  clientQuery.developer.validate.app.$post.queryOptions({
-    input: {
-      json: {
-        packageName: params.packageName,
-        trackId: params.trackId,
-      },
+// ✅ CORRECT: Use useHonoMutation for mutations
+const { isPending, mutate, mutateAsync } = useHonoMutation(
+  client.developer.validate.package,
+  "$post",
+  {
+    onSuccess: (data, variables) => {
+      // data: typed response from server
+      // variables: the input you passed to mutate()
+      console.log("Success:", data);
     },
-    enabled: !!params.packageName && !!params.trackId,
-  }),
+    onError: (error) => {
+      // error.data contains the typed error response from server
+      // error.status contains the HTTP status code
+      console.error("Error:", error.data);
+    },
+  }
+);
+
+// Call the mutation with typed input
+mutate({
+  json: { packageName: "com.example.app" },
+});
+
+// Or use async/await
+try {
+  const result = await mutateAsync({
+    json: { packageName: "com.example.app" },
+  });
+} catch (error) {
+  // Handle error
+}
+```
+
+**Advanced Features:**
+
+```tsx
+// 1. Query with select to transform data
+const { data: appNames } = useHonoQuery(
+  client.developer.app,
+  "$get",
+  undefined,
+  {
+    select: (data) => data.apps.map(app => app.name),
+  }
+);
+
+// 2. Mutation with optimistic updates
+const { mutate } = useHonoMutation(
+  client.developer.app.update,
+  "$post",
+  {
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["apps"] });
+
+      // Snapshot previous value
+      const previousApps = queryClient.getQueryData(["apps"]);
+
+      // Optimistically update
+      queryClient.setQueryData(["apps"], (old) => ({
+        ...old,
+        apps: [...old.apps, variables.json],
+      }));
+
+      return { previousApps };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["apps"], context.previousApps);
+    },
+  }
+);
+
+// 3. Using with TanStack Form
+const form = useForm({
+  defaultValues: { packageName: "" },
+  validators: { onChange: packageSchema },
+  onSubmit: async ({ value }) => {
+    mutate({ json: { packageName: value.packageName } });
+  },
+});
+```
+
+**Error Handling:**
+```tsx
+const { mutate } = useHonoMutation(
+  client.developer.validate.package,
+  "$post",
+  {
+    onError: (error) => {
+      // error is typed as: Error & { status: number; data: TError }
+      console.log(error.status); // HTTP status code
+      console.log(error.data); // Typed error response from API
+
+      // Check for specific error types from your API
+      if (error.data._tag === "InvalidPackageNameError") {
+        form.setErrorMap({
+          onChange: {
+            fields: {
+              packageName: { message: error.data.error },
+            },
+          },
+        });
+      }
+    },
+  }
 );
 ```
 
@@ -155,6 +261,12 @@ const query = useQuery({
   queryKey: ["key"],
   queryFn: async () => { /* ... */ },
 });
+
+// ❌ NEVER use the old clientQuery pattern
+import { clientQuery } from "@/lib/api-client"; // This export doesn't exist
+const mutation = useMutation(
+  clientQuery.developer.validate.package.$post.mutationOptions()
+);
 ```
 
 #### TanStack Form with Zod Validation

@@ -1,29 +1,24 @@
-import React from "react";
-import { View, ScrollView, Pressable, ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Link } from "expo-router";
-import { Plus, CheckCircle2, Clock, XCircle } from "lucide-react-native";
-import { useQuery } from "@tanstack/react-query";
-import { Image } from "expo-image";
-import { Card } from "@/components/Card";
 import {
+  Body3,
+  ButtonText,
+  Desc3,
   Title3,
   Title4,
-  Body3,
-  Desc3,
-  ButtonText,
 } from "@/components/Typography";
-import { clientQuery } from "@/lib/api-client";
 import { colors } from "@/design-system";
-import type { ImageContentPosition } from "expo-image/src/Image.types";
+import { Image } from "expo-image";
+import { Link } from "expo-router";
+import { Plus } from "lucide-react-native";
+import React from "react";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { client } from "@/lib/api-client";
+import { useHonoQuery } from "@/lib/hono-rpc";
 
 export default function DeveloperIndex() {
   const insets = useSafeAreaInsets();
-
-  // Fetch app list from backend
-  const { data, isLoading } = useQuery(
-    clientQuery.developer.app.$get.queryOptions({}),
-  );
+  const { data, isLoading } = useHonoQuery(client.developer.app, "$get");
 
   const apps = data?.apps || [];
   const hasApps = apps.length > 0;

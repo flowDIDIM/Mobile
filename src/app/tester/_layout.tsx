@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function TesterLayout() {
   return (
@@ -8,6 +7,8 @@ export default function TesterLayout() {
         headerShown: false,
         contentStyle: { backgroundColor: "transparent" },
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }

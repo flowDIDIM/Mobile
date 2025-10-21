@@ -4,7 +4,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
@@ -13,7 +12,8 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { clientQuery } from "@/lib/api-client";
+import { client } from "@/lib/api-client";
+import { useHonoMutation } from "@/lib/hono-rpc";
 import { Desc1, Title2, Title3 } from "@/components/Typography";
 
 const packageSchema = z.object({
@@ -31,45 +31,39 @@ export default function CreatePackage() {
   const router = useRouter();
   const bottomSheetRef = React.useRef<BottomSheet>(null);
 
-  const { isPending, mutate } = useMutation(
-    clientQuery.developer.validate.package.$post.mutationOptions({
-      onSuccess: (data, input) => {
+  const { isPending, mutate } = useHonoMutation(
+    client.developer.validate.package,
+    "$post",
+    {
+      onSuccess: (data, variables) => {
         // Navigate to next page with track data
         router.push({
           pathname: "/developer/create/track",
           params: {
-            packageName: input.json.packageName,
+            packageName: variables.json.packageName,
             tracks: JSON.stringify(data.tracks),
           },
         });
       },
       onError: (error) => {
-        console.log(error.cause);
-        if (
-          error.cause &&
-          typeof error.cause === "object" &&
-          "_tag" in error.cause &&
-          "error" in error.cause
-        ) {
-          if (error.cause._tag === "InvalidPackageNameError") {
-            const errorMessage =
-              typeof error.cause.error === "string"
-                ? error.cause.error
-                : "유효하지 않은 패키지명입니다";
-            form.setErrorMap({
-              onChange: {
-                fields: {
-                  packageName: { message: errorMessage },
-                },
+        if (!("_tag" in error)) {
+          return;
+        }
+        if (error._tag === "InvalidPackageNameError") {
+          const errorMessage = error.error && "유효하지 않은 패키지명입니다";
+          form.setErrorMap({
+            onChange: {
+              fields: {
+                packageName: { message: errorMessage },
               },
-            });
-            return;
-          }
+            },
+          });
+          return;
         }
 
         bottomSheetRef.current?.expand();
       },
-    }),
+    },
   );
 
   const form = useForm({

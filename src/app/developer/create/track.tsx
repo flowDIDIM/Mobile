@@ -4,7 +4,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { Dropdown, type DropdownOption } from "@/components/Dropdown";
 import { Button } from "@/components/Button";
 import { Title3, Title2 } from "@/components/Typography";
@@ -13,7 +12,8 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import { clientQuery } from "@/lib/api-client";
+import { client } from "@/lib/api-client";
+import { useHonoMutation } from "@/lib/hono-rpc";
 import { colors } from "@/design-system";
 
 export default function CreateTrack() {
@@ -35,15 +35,17 @@ export default function CreateTrack() {
     [params.tracks],
   );
 
-  const { isPending, mutate: validateTrackMutation } = useMutation(
-    clientQuery.developer.validate.track.$post.mutationOptions({
-      onSuccess: (data, input) => {
+  const { isPending, mutate: validateTrackMutation } = useHonoMutation(
+    client.developer.validate.track,
+    "$post",
+    {
+      onSuccess: (data, variables) => {
         // Navigate to info page with package, track, and app info
         router.push({
           pathname: "/developer/create/info",
           params: {
-            packageName: input.json.packageName,
-            trackId: input.json.trackId,
+            packageName: variables.json.packageName,
+            trackId: variables.json.trackId,
             // Pass app info from API response
             appInfo: JSON.stringify({
               title: data.title,
@@ -58,7 +60,7 @@ export default function CreateTrack() {
       onError: () => {
         bottomSheetRef.current?.expand();
       },
-    }),
+    },
   );
 
   const form = useForm({

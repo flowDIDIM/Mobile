@@ -19,7 +19,6 @@ import type {
   StatusCode,
   SuccessStatusCode,
 } from "hono/utils/http-status";
-import { client } from "@/lib/api-client";
 
 type ErrorStatusCode = ClientErrorStatusCode | ServerErrorStatusCode;
 

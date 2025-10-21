@@ -3,14 +3,14 @@ import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useForm } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { BoxField } from "@/components/BoxField";
 import { Button } from "@/components/Button";
 import { Title3, Desc1 } from "@/components/Typography";
-import { clientQuery } from "@/lib/api-client";
+import { client } from "@/lib/api-client";
+import { useHonoMutation } from "@/lib/hono-rpc";
 
 const PAYMENT_PRESETS = [10000, 30000, 50000];
 
@@ -47,8 +47,10 @@ export default function CreateInfo() {
   }, [params.appInfo]);
 
   // Payment mutation
-  const { mutate: createPayment } = useMutation(
-    clientQuery.developer.payment.create.$post.mutationOptions({
+  const { mutate: createPayment } = useHonoMutation(
+    client.developer.payment.create,
+    "$post",
+    {
       onSuccess: async (data) => {
         // Open payment URL in browser
         if ("paymentUrl" in data && data.paymentUrl) {
@@ -60,7 +62,7 @@ export default function CreateInfo() {
       onError: (error) => {
         console.error("Payment creation failed:", error);
       },
-    }),
+    },
   );
 
   const form = useForm({
