@@ -11,8 +11,8 @@ import { authClient } from "@/lib/auth-client";
 export default function MyPage() {
   const insets = useSafeAreaInsets();
 
-  // Mock user email - replace with actual user data from better-auth
-  const userEmail = "example@gmail.com";
+  const { data: session } = authClient.useSession();
+  const userEmail = session?.user?.email ?? "";
 
   const handleSwitchToTester = async () => {
     Alert.alert(
