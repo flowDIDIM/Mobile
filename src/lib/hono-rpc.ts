@@ -1,24 +1,72 @@
 import {
-	type SkipToken,
-	type UseMutationOptions,
-	type UseMutationResult,
-	type UseQueryOptions,
-	type UseQueryResult,
-	type UseSuspenseQueryOptions,
-	type UseSuspenseQueryResult,
-	useMutation as useRQMutation,
-	useQuery as useRQQuery,
-	useSuspenseQuery as useRQSuspenseQuery,
+  type SkipToken,
+  useMutation as useRQMutation,
+  type UseMutationOptions,
+  type UseMutationResult,
+  useQuery as useRQQuery,
+  type UseQueryOptions,
+  type UseQueryResult,
+  useSuspenseQuery as useRQSuspenseQuery,
+  type UseSuspenseQueryOptions,
+  type UseSuspenseQueryResult,
 } from "@tanstack/react-query";
-import type { InferResponseType } from "hono/client";
+import type { ClientResponse } from "hono/client";
+import type { Endpoint } from "hono/types";
 import type {
-	ClientErrorStatusCode,
-	ServerErrorStatusCode,
-	StatusCode,
-	SuccessStatusCode,
+  ClientErrorStatusCode,
+  ContentfulStatusCode,
+  ServerErrorStatusCode,
+  StatusCode,
+  SuccessStatusCode,
 } from "hono/utils/http-status";
+import { client } from "@/lib/api-client";
 
 type ErrorStatusCode = ClientErrorStatusCode | ServerErrorStatusCode;
+
+type IsExactly<T, U> = [T] extends [U]
+  ? [U] extends [T]
+    ? true
+    : false
+  : false;
+
+type NormalizeStatus<T> = T extends { status: infer S }
+  ? IsExactly<S, ContentfulStatusCode> extends true
+    ? Omit<T, "status"> & { status: 200 }
+    : T
+  : T;
+
+type InferEndpointType<T> = T extends (
+  args: infer R,
+  options: any | undefined,
+) => Promise<infer U>
+  ? U extends ClientResponse<infer O, infer S, infer F>
+    ? {
+        input: NonNullable<R>;
+        output: O;
+        outputFormat: F;
+        status: S;
+      } extends Endpoint
+      ? {
+          input: NonNullable<R>;
+          output: O;
+          outputFormat: F;
+          status: S;
+        }
+      : never
+    : never
+  : never;
+
+type InferResponseTypeFromEndpoint<
+  T extends Endpoint,
+  U extends StatusCode,
+> = T extends {
+  output: infer O;
+  status: infer S extends StatusCode;
+}
+  ? S extends U
+    ? O
+    : never
+  : never;
 
 type HttpMethodKey =
   | "$get"
@@ -40,8 +88,8 @@ type EndpointResponseType<
   T extends object,
   M extends AvailableMethodKeys<T>,
   U extends StatusCode = StatusCode,
-> = T[M] extends (...args: any[]) => Promise<Response>
-  ? InferResponseType<T[M], U>
+> = T[M] extends (...args: any[]) => Promise<any>
+  ? InferResponseTypeFromEndpoint<NormalizeStatus<InferEndpointType<T[M]>>, U>
   : never;
 
 function getPathFromUrl(url: string): string {
@@ -75,7 +123,7 @@ export const getQueryKey = <
 >(
   endpoint: T,
   method: M,
-  params: Params,
+  params?: Params,
 ): QueryKey<T, M, Params> => {
   const urlString = endpoint.$url().toString();
   const path = getPathFromUrl(urlString);
@@ -110,7 +158,7 @@ export const queryOptions = <
 >(
   endpoint: T,
   method: M,
-  params: Params,
+  params?: Params,
   options?: Options,
 ): NoInfer<
   Omit<
@@ -207,7 +255,7 @@ export const mutationOptions = <
   };
 };
 
-export const useQuery = <
+export const useHonoQuery = <
   T extends object & { $url: () => URL | { toString: () => string } },
   M extends AvailableMethodKeys<T>,
   Params extends EndpointMethodParams<T, M>,
@@ -225,7 +273,7 @@ export const useQuery = <
 >(
   endpoint: T & { $url: () => URL | { toString: () => string } },
   method: M,
-  params: Params,
+  params?: Params,
   options?: Options,
 ): UseQueryResult<
   InferSelectReturnType<TResponse, Options["select"]>,
@@ -241,7 +289,7 @@ export const useQuery = <
   );
 };
 
-export const useSuspenseQuery = <
+export const useHonoSuspenseQuery = <
   T extends object & { $url: () => URL | { toString: () => string } },
   M extends AvailableMethodKeys<T>,
   Params extends EndpointMethodParams<T, M>,
@@ -275,7 +323,7 @@ export const useSuspenseQuery = <
   );
 };
 
-export const useMutation = <
+export const useHonoMutation = <
   T extends object,
   M extends AvailableMethodKeys<T>,
   TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
