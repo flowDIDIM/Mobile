@@ -1,159 +1,300 @@
-import type {
-  QueryFunctionContext,
-  QueryKey,
-  UseMutationOptions,
-  UseQueryOptions,
+import {
+	type SkipToken,
+	type UseMutationOptions,
+	type UseMutationResult,
+	type UseQueryOptions,
+	type UseQueryResult,
+	type UseSuspenseQueryOptions,
+	type UseSuspenseQueryResult,
+	useMutation as useRQMutation,
+	useQuery as useRQQuery,
+	useSuspenseQuery as useRQSuspenseQuery,
 } from "@tanstack/react-query";
+import type { InferResponseType } from "hono/client";
 import type {
-  ClientRequestOptions,
-  ClientResponse,
-  InferRequestType,
-  InferResponseType,
-} from "hono/client";
-import type { SuccessStatusCode } from "hono/utils/http-status";
+	ClientErrorStatusCode,
+	ServerErrorStatusCode,
+	StatusCode,
+	SuccessStatusCode,
+} from "hono/utils/http-status";
 
-type ClientRequestEndpoint = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: any,
-  options?: ClientRequestOptions,
-) => Promise<ClientResponse<unknown>>;
+type ErrorStatusCode = ClientErrorStatusCode | ServerErrorStatusCode;
 
-export interface QueryEndpoint<TEndpoint extends ClientRequestEndpoint> {
-  call: TEndpoint;
-  queryOptions: (
-    args: Omit<
-      UseQueryOptions<InferResponseType<TEndpoint, SuccessStatusCode>>,
-      "queryKey" | "queryFn"
-    > &
-      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-      ({} extends InferRequestType<TEndpoint>
-        ? { input?: undefined }
-        : { input: InferRequestType<TEndpoint> }),
-  ) => {
-    queryKey: QueryKey;
-    queryFn: (
-      opts: QueryFunctionContext,
-    ) => Promise<InferResponseType<TEndpoint, SuccessStatusCode>>;
-  };
-  mutationOptions: (
-    args: Omit<
-      UseMutationOptions<
-        InferResponseType<TEndpoint, SuccessStatusCode>,
-        Error,
-        InferRequestType<TEndpoint>
-      >,
-      "mutationKey" | "mutationFn"
-    >,
-  ) => {
-    mutationKey: QueryKey;
-    mutationFn: (
-      input: InferRequestType<TEndpoint>,
-    ) => Promise<InferResponseType<TEndpoint, SuccessStatusCode>>;
-  };
+type HttpMethodKey =
+  | "$get"
+  | "$post"
+  | "$put"
+  | "$delete"
+  | "$patch"
+  | "$options"
+  | "$head";
+
+type AvailableMethodKeys<T> = Extract<keyof T, HttpMethodKey>;
+
+type EndpointMethodParams<
+  T extends object,
+  M extends AvailableMethodKeys<T>,
+> = T[M] extends (params: infer P, ...args: any[]) => any ? P : never;
+
+type EndpointResponseType<
+  T extends object,
+  M extends AvailableMethodKeys<T>,
+  U extends StatusCode = StatusCode,
+> = T[M] extends (...args: any[]) => Promise<Response>
+  ? InferResponseType<T[M], U>
+  : never;
+
+function getPathFromUrl(url: string): string {
+  try {
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      return urlObj.pathname;
+    }
+    return url;
+  } catch {
+    return url;
+  }
 }
 
-function createHcQueryEndpoint<TEndpoint extends ClientRequestEndpoint>(
-  endpoint: TEndpoint,
-  path: string[],
-): QueryEndpoint<TEndpoint> {
-  return {
-    call: endpoint,
-    queryOptions(args) {
-      const { input, ...rest } = args;
-      return {
-        ...rest,
-        queryKey: buildKey(path, {
-          type: "query",
-          input: input,
-        }),
-        queryFn: async ({ signal }) => {
-          console.log(`--> GET ${JSON.stringify(input)}`);
-          const res = await endpoint(input, { init: { signal } });
-          const json = await res.json();
+type InferSelectReturnType<TData, TSelect> = TSelect extends (
+  data: TData,
+) => infer R
+  ? R
+  : TData;
 
-          if (!res.ok) {
-            console.log(`<-- ERROR ${res.status} ${JSON.stringify(json)}`);
-            throw new Error(`Request failed with status ${res.status}`);
-          }
+export type QueryKey<
+  T extends object & { $url: () => URL | { toString: () => string } },
+  M extends AvailableMethodKeys<T>,
+  Params extends EndpointMethodParams<T, M>,
+> = [M, string, Params];
 
-          console.log(`<-- ${res.status}`, JSON.stringify(json));
-          return json as InferResponseType<TEndpoint, SuccessStatusCode>;
-        },
-      };
-    },
-    mutationOptions(args) {
-      return {
-        ...args,
-        mutationKey: buildKey(path, {
-          type: "mutation",
-        }),
-        mutationFn: async (input) => {
-          console.log(`--> POST ${JSON.stringify(input)}`);
+export const getQueryKey = <
+  T extends object & { $url: () => URL | { toString: () => string } },
+  M extends AvailableMethodKeys<T>,
+  Params extends EndpointMethodParams<T, M>,
+>(
+  endpoint: T,
+  method: M,
+  params: Params,
+): QueryKey<T, M, Params> => {
+  const urlString = endpoint.$url().toString();
+  const path = getPathFromUrl(urlString);
 
-          const res = await endpoint(input);
-          const json = await res.json();
-
-          if (!res.ok) {
-            console.log(`<-- ERROR ${res.status} ${JSON.stringify(json)}`);
-            throw new Error(`Request failed with status ${res.status}`, {
-              cause: json,
-            });
-          }
-
-          console.log(`<-- ${res.status}`, JSON.stringify(json));
-          return json as InferResponseType<TEndpoint, SuccessStatusCode>;
-        },
-      };
-    },
-  };
-}
-
-type QueryClient<T> = {
-  [K in keyof T]: T[K] extends ClientRequestEndpoint
-    ? QueryEndpoint<T[K]>
-    : T[K] extends object
-      ? QueryClient<T[K]>
-      : T[K];
+  const filteredParams = {} as any;
+  if (params && typeof params === "object") {
+    if ("param" in params) {
+      filteredParams.param = params.param;
+    }
+    if ("query" in params) {
+      filteredParams.query = params.query;
+    }
+  }
+  return [method, path, filteredParams] as unknown as QueryKey<T, M, Params>;
 };
 
-export function hcQuery<T extends object>(obj: T) {
-  const createProxy = (target: T, path: string[] = []): QueryClient<T> => {
-    return new Proxy(target, {
-      get(target, prop, reciever) {
-        const value = Reflect.get(target, prop, reciever);
-        if (typeof prop !== "string" || prop === "then") {
-          return value;
-        }
+export const queryOptions = <
+  T extends object & { $url: () => URL | { toString: () => string } },
+  M extends AvailableMethodKeys<T>,
+  Params extends EndpointMethodParams<T, M>,
+  Options extends Omit<
+    UseQueryOptions<
+      TResponse,
+      TError,
+      InferSelectReturnType<TResponse, TError>,
+      QueryKey<T, M, Params>
+    >,
+    "queryKey" | "queryFn"
+  >,
+  TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
+  TError = EndpointResponseType<T, M, ErrorStatusCode>,
+>(
+  endpoint: T,
+  method: M,
+  params: Params,
+  options?: Options,
+): NoInfer<
+  Omit<
+    UseQueryOptions<
+      TResponse,
+      TError,
+      InferSelectReturnType<TResponse, Options["select"]>,
+      QueryKey<T, M, Params>
+    >,
+    "queryFn"
+  > & {
+    queryFn: Exclude<
+      UseQueryOptions<
+        TResponse,
+        TError,
+        InferSelectReturnType<TResponse, Options["select"]>,
+        QueryKey<T, M, Params>
+      >["queryFn"],
+      SkipToken | undefined
+    >;
+  }
+> => {
+  const endpointFn = endpoint[method] as unknown as (
+    params: any,
+  ) => Promise<Response>;
+  const result = {
+    queryKey: getQueryKey(endpoint, method, params),
+    queryFn: async () => {
+      const res = await endpointFn(params);
+      if (res.status >= 200 && res.status < 300) {
+        return (await res.json()) as TResponse;
+      }
+      const errorData = (await res.json()) as TError;
 
-        const nextPath = [...path, prop];
-        if (["$get", "$post", "$put", "$delete"].includes(prop)) {
-          return createHcQueryEndpoint(
-            value as ClientRequestEndpoint,
-            nextPath,
-          );
-        }
+      const error = new Error(
+        `Request failed with status ${res.status}`,
+      ) as Error & {
+        status: number;
+        data: TError;
+      };
 
-        return createProxy(value as T, nextPath);
-      },
-    }) as QueryClient<T>;
+      error.status = res.status;
+      error.data = errorData;
+
+      throw error;
+    },
+    ...options,
   };
 
-  return createProxy(obj);
-}
+  return result as any;
+};
 
-type KeyType = "query" | "mutation";
+export const mutationOptions = <
+  T extends object,
+  M extends AvailableMethodKeys<T>,
+  TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
+  TError = EndpointResponseType<T, M, ErrorStatusCode>,
+  TVariables = EndpointMethodParams<T, M>,
+  TContext = unknown,
+>(
+  endpoint: T & { $url: () => URL | { toString: () => string } },
+  method: M,
+  options?: Omit<
+    UseMutationOptions<TResponse, TError, TVariables, TContext>,
+    "mutationFn" | "mutationKey"
+  >,
+): UseMutationOptions<TResponse, TError, TVariables, TContext> => {
+  const endpointFn = endpoint[method] as unknown as (
+    params: TVariables,
+  ) => Promise<Response>;
 
-interface BuildKeyOptions<TType extends KeyType, TInput> {
-  type: TType;
-  input?: TType extends "mutation" ? never : TInput;
-}
+  return {
+    mutationKey: getQueryKey(endpoint, method, {} as any),
+    mutationFn: async (variables) => {
+      const res = await endpointFn(variables);
+      if (res.status >= 200 && res.status < 300) {
+        return (await res.json()) as TResponse;
+      }
+      const errorData = (await res.json()) as TError;
 
-function buildKey<TType extends KeyType, TInput>(
-  path: string[],
-  opts: BuildKeyOptions<TType, TInput>,
-): QueryKey {
-  return [
-    path,
-    { type: opts.type, ...(opts.input !== undefined && { input: opts.input }) },
-  ] as const;
-}
+      const error = new Error(
+        `Request failed with status ${res.status}`,
+      ) as Error & {
+        status: number;
+        data: TError;
+      };
+
+      error.status = res.status;
+      error.data = errorData;
+
+      throw error;
+    },
+    ...options,
+  };
+};
+
+export const useQuery = <
+  T extends object & { $url: () => URL | { toString: () => string } },
+  M extends AvailableMethodKeys<T>,
+  Params extends EndpointMethodParams<T, M>,
+  Options extends Omit<
+    UseQueryOptions<
+      TResponse,
+      TError,
+      InferSelectReturnType<TResponse, TError>,
+      QueryKey<T, M, Params>
+    >,
+    "queryKey" | "queryFn"
+  >,
+  TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
+  TError = EndpointResponseType<T, M, ErrorStatusCode>,
+>(
+  endpoint: T & { $url: () => URL | { toString: () => string } },
+  method: M,
+  params: Params,
+  options?: Options,
+): UseQueryResult<
+  InferSelectReturnType<TResponse, Options["select"]>,
+  TError
+> => {
+  return useRQQuery(
+    queryOptions<T, M, Params, Options, TResponse, TError>(
+      endpoint,
+      method,
+      params,
+      options,
+    ),
+  );
+};
+
+export const useSuspenseQuery = <
+  T extends object & { $url: () => URL | { toString: () => string } },
+  M extends AvailableMethodKeys<T>,
+  Params extends EndpointMethodParams<T, M>,
+  Options extends Omit<
+    UseSuspenseQueryOptions<
+      TResponse,
+      TError,
+      InferSelectReturnType<TResponse, TError>,
+      QueryKey<T, M, Params>
+    >,
+    "queryKey" | "queryFn"
+  >,
+  TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
+  TError = EndpointResponseType<T, M, ErrorStatusCode>,
+>(
+  endpoint: T & { $url: () => URL | { toString: () => string } },
+  method: M,
+  params: Params,
+  options?: Options,
+): UseSuspenseQueryResult<
+  InferSelectReturnType<TResponse, Options["select"]>,
+  TError
+> => {
+  return useRQSuspenseQuery(
+    queryOptions<T, M, Params, Options, TResponse, TError>(
+      endpoint,
+      method,
+      params,
+      options,
+    ),
+  );
+};
+
+export const useMutation = <
+  T extends object,
+  M extends AvailableMethodKeys<T>,
+  TResponse = EndpointResponseType<T, M, SuccessStatusCode>,
+  TError = EndpointResponseType<T, M, ErrorStatusCode>,
+  TVariables = EndpointMethodParams<T, M>,
+  TContext = unknown,
+>(
+  endpoint: T & { $url: () => URL | { toString: () => string } },
+  method: M,
+  options?: Omit<
+    UseMutationOptions<TResponse, TError, TVariables, TContext>,
+    "mutationFn" | "mutationKey"
+  >,
+): UseMutationResult<TResponse, TError, TVariables, TContext> => {
+  return useRQMutation(
+    mutationOptions<T, M, TResponse, TError, TVariables, TContext>(
+      endpoint,
+      method,
+      options,
+    ),
+  );
+};

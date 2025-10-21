@@ -1,11 +1,9 @@
 import { env } from "@/env";
 
-import type { AppType } from "../../../DIDIM-Server/src/app";
-import { hc } from "hono/client";
-import { hcQuery } from "@/lib/hono-rpc";
 import { authClient } from "@/lib/auth-client";
+import { hcWithType } from "../../../DIDIM-Server/dist/app";
 
-export const client = hc<AppType>(env.EXPO_PUBLIC_API_URL, {
+export const client = hcWithType(env.EXPO_PUBLIC_API_URL, {
   headers: () => {
     const cookies = authClient.getCookie();
 
@@ -14,4 +12,3 @@ export const client = hc<AppType>(env.EXPO_PUBLIC_API_URL, {
     };
   },
 });
-export const clientQuery = hcQuery(client);
