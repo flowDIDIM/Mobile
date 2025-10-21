@@ -190,19 +190,7 @@ export const queryOptions = <
       if (res.status >= 200 && res.status < 300) {
         return (await res.json()) as TResponse;
       }
-      const errorData = (await res.json()) as TError;
-
-      const error = new Error(
-        `Request failed with status ${res.status}`,
-      ) as Error & {
-        status: number;
-        data: TError;
-      };
-
-      error.status = res.status;
-      error.data = errorData;
-
-      throw error;
+      throw (await res.json()) as TError;
     },
     ...options,
   };
@@ -236,19 +224,8 @@ export const mutationOptions = <
       if (res.status >= 200 && res.status < 300) {
         return (await res.json()) as TResponse;
       }
-      const errorData = (await res.json()) as TError;
 
-      const error = new Error(
-        `Request failed with status ${res.status}`,
-      ) as Error & {
-        status: number;
-        data: TError;
-      };
-
-      error.status = res.status;
-      error.data = errorData;
-
-      throw error;
+      throw (await res.json()) as TError;
     },
     ...options,
   };

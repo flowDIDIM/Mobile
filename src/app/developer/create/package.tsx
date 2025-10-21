@@ -46,22 +46,19 @@ export default function CreatePackage() {
         });
       },
       onError: (error) => {
-        if (!("_tag" in error)) {
-          return;
-        }
-        if (error._tag === "InvalidPackageNameError") {
-          const errorMessage = error.error && "유효하지 않은 패키지명입니다";
-          form.setErrorMap({
-            onChange: {
-              fields: {
-                packageName: { message: errorMessage },
-              },
-            },
-          });
+        if ("_tag" in error && error._tag === "NoValidTracksError") {
+          // 올바른 트랙이 없을 때만 바텀 시트 열기
+          bottomSheetRef.current?.expand();
           return;
         }
 
-        bottomSheetRef.current?.expand();
+        form.setErrorMap({
+          onChange: {
+            fields: {
+              packageName: { message: error.error },
+            },
+          },
+        });
       },
     },
   );
