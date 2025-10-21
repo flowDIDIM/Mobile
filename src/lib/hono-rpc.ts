@@ -186,11 +186,24 @@ export const queryOptions = <
   const result = {
     queryKey: getQueryKey(endpoint, method, params),
     queryFn: async () => {
+      const urlString = endpoint.$url().toString();
+      const path = getPathFromUrl(urlString);
+      const httpMethod = method.replace("$", "").toUpperCase();
+
+      console.log(`--> ${httpMethod} ${path}`);
+
       const res = await endpointFn(params);
+      const data = await res.json();
+
+      console.log(
+        `<-- ${httpMethod} ${path} ${res.status}`,
+        JSON.stringify(data, null, 2),
+      );
+
       if (res.status >= 200 && res.status < 300) {
-        return (await res.json()) as TResponse;
+        return data as TResponse;
       }
-      throw (await res.json()) as TError;
+      throw data as TError;
     },
     ...options,
   };
@@ -220,12 +233,25 @@ export const mutationOptions = <
   return {
     mutationKey: getQueryKey(endpoint, method, {} as any),
     mutationFn: async (variables) => {
+      const urlString = endpoint.$url().toString();
+      const path = getPathFromUrl(urlString);
+      const httpMethod = method.replace("$", "").toUpperCase();
+
+      console.log(`--> ${httpMethod} ${path}`);
+
       const res = await endpointFn(variables);
+      const data = await res.json();
+
+      console.log(
+        `<-- ${httpMethod} ${path} ${res.status}`,
+        JSON.stringify(data, null, 2),
+      );
+
       if (res.status >= 200 && res.status < 300) {
-        return (await res.json()) as TResponse;
+        return data as TResponse;
       }
 
-      throw (await res.json()) as TError;
+      throw data as TError;
     },
     ...options,
   };
