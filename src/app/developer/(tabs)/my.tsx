@@ -31,7 +31,7 @@ export default function MyPage() {
               await authClient.signOut();
               // Navigate to tester after re-login
               // The user will need to log in with a different Google account
-              router.replace("/tester");
+              router.replace("/");
             } catch (error) {
               Alert.alert("오류", "계정 전환 중 문제가 발생했습니다.");
             }

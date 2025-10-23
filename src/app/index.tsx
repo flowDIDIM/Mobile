@@ -1,17 +1,29 @@
 import { authClient } from "@/lib/auth-client";
 import { StatusBar, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Title3, Body3 } from "@/components/Typography";
-import React from "react";
+import { Body3, Title3 } from "@/components/Typography";
+import React, { useEffect } from "react";
+import {
+  type Href,
+  router,
+  useLocalSearchParams,
+  useGlobalSearchParams,
+} from "expo-router";
 
 export default function Index() {
   const insets = useSafeAreaInsets();
+
+  const { path } = useGlobalSearchParams<{
+    path: string;
+  }>();
+
+  const { data: session, isPending } = authClient.useSession();
 
   const handleDeveloperLogin = async () => {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/developer",
+        callbackURL: `/?path=developer`,
         scopes: ["https://www.googleapis.com/auth/androidpublisher"],
       });
     } catch (error) {
@@ -23,12 +35,19 @@ export default function Index() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/tester",
+        callbackURL: "/?path=tester",
       });
     } catch (error) {
       console.error("Google login failed:", error);
     }
   };
+
+  useEffect(() => {
+    if (session && path) {
+      if (router.canDismiss()) router.dismissAll();
+      router.replace(`/${path}` as Href);
+    }
+  }, [session, path]);
 
   return (
     <View className="flex-1">
@@ -49,6 +68,7 @@ export default function Index() {
           className="bg-secondary rounded-lg px-6 py-4 w-full max-w-xs"
           activeOpacity={0.8}
           onPress={handleDeveloperLogin}
+          disabled={isPending}
         >
           <Title3 className="text-center">개발자 (Developer)</Title3>
         </TouchableOpacity>
@@ -57,6 +77,7 @@ export default function Index() {
           className="bg-secondary rounded-lg px-6 py-4 w-full max-w-xs"
           activeOpacity={0.8}
           onPress={handleTesterLogin}
+          disabled={isPending}
         >
           <Title3 className="text-center">테스터 (Tester)</Title3>
         </TouchableOpacity>

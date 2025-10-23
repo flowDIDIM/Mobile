@@ -11,13 +11,11 @@ import { Link } from "expo-router";
 import { Plus } from "lucide-react-native";
 import React from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { client } from "@/lib/api-client";
 import { useHonoQuery } from "@/lib/hono-rpc";
 
 export default function DeveloperIndex() {
-  const insets = useSafeAreaInsets();
   const { data, isLoading } = useHonoQuery(client.developer.app, "$get");
 
   const apps = data?.apps || [];
