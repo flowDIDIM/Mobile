@@ -6,7 +6,14 @@ export default function TesterTabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "transparent",
+        },
+        headerTitleStyle: {
+          color: colors.main,
+        },
         tabBarStyle: {
           backgroundColor: "transparent",
           borderTopWidth: 0,
@@ -23,24 +30,28 @@ export default function TesterTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: "홈",
           tabBarIcon: ({ color, size }) => <Home size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
+          title: "탐색",
           tabBarIcon: ({ color, size }) => <Search size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="shop"
         options={{
+          title: "상점",
           tabBarIcon: ({ color, size }) => <Gift size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="my"
         options={{
+          title: "마이페이지",
           tabBarIcon: ({ color, size }) => <User size={24} color={color} />,
         }}
       />

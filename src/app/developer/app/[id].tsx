@@ -14,7 +14,7 @@ function getStatusText(
   currentDay: number,
 ): string {
   if (dropped) {
-    return `${currentDay}일차 이탈`;
+    return `${currentDay}일차 삭제`;
   }
   if (completed) {
     return `${currentDay}일차 완료`;
@@ -72,72 +72,69 @@ export default function AppDetail() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          paddingTop: insets.top + 44,
-          paddingBottom: insets.bottom + 40,
+          paddingTop: insets.top,
         }}
       >
-        {/* Top Navigation */}
-        <View className="h-13 items-center justify-center relative">
-          <Title3>테스트 현황</Title3>
-          <Pressable className="absolute left-5" onPress={() => router.back()}>
-            <ChevronLeft size={24} color="#F1F3F3" strokeWidth={2} />
+        {/* Top Navigation - h-13 = 52px */}
+        <View className="bg-gray-950 h-13 items-center justify-center relative px-5">
+          <Title3 className="text-center">테스트 현황</Title3>
+          <Pressable
+            className="absolute left-5 top-3.5"
+            onPress={() => router.back()}
+          >
+            <ChevronLeft size={24} color={colors.main} strokeWidth={2} />
           </Pressable>
         </View>
 
-        {/* Notice Section */}
-        <View className="items-center overflow-hidden px-5 mt-10">
-          {/* Status Badge */}
+        {/* Notice Section - px-5 = 20px horizontal padding, mt-6 = 24px top margin */}
+        <View className="px-5 mt-6">
+          {/* Status Badge Row - py-2 = 8px */}
           <View className="flex-row items-center justify-center gap-3 py-2">
-            {isActive ? (
-              <>
-                <Title3 className="text-primary text-center">진행중</Title3>
-                <View className="bg-[#BFD9FF] px-1.5 py-0.5 rounded-full">
-                  <ButtonText className="text-primary text-[10px]">
-                    완료
-                  </ButtonText>
-                </View>
-              </>
-            ) : (
-              <Title3 className="text-sub text-center">테스트 종료</Title3>
+            <Title3
+              className="text-center"
+              style={{ color: isActive ? colors.primary : colors.sub }}
+            >
+              {isActive ? "테스트 진행중" : "테스트 종료"}
+            </Title3>
+            {isActive && (
+              <View className="bg-[#BFD9FF] rounded-full flex-row items-center justify-center px-1.5 py-0.5">
+                <ButtonText className="text-primary">완료</ButtonText>
+              </View>
             )}
           </View>
 
-          {/* Stats */}
-          <View className="flex-row items-center justify-between py-3 px-16 w-[319px]">
+          {/* Stats Row - reduced spacing */}
+          <View className="flex-row items-center mx-auto gap-16 pt-3 pb-1 px-8">
             <View className="items-center">
-              <Title4 className="text-main text-center">테스터</Title4>
-              <Headline1 className="text-main text-center">
-                {app.testerCount}명
-              </Headline1>
+              <Title3 className="text-center">테스터</Title3>
+              <Headline1 className="text-center">{app.testerCount}명</Headline1>
             </View>
             <View className="items-center">
-              <Title4 className="text-main text-center">진행률</Title4>
-              <Headline1 className="text-main text-center">
-                {app.progress}%
-              </Headline1>
+              <Title3 className="text-center">진행률</Title3>
+              <Headline1 className="text-center">{app.progress}%</Headline1>
             </View>
           </View>
 
-          {/* Divider */}
-          <View className="h-px w-[319px] bg-white/[0.32]" />
+          {/* Divider - h-px = 1px, mx-2 = 8px horizontal margin */}
+          <View className="h-px bg-white/[0.32] mx-2" />
         </View>
 
-        {/* Testers List */}
-        <View className="px-7 pt-3 gap-3">
+        {/* Testers List - reduced top margin, px-7 = 28px, gap-3 = 12px */}
+        <View className="mt-3 px-7 gap-3">
           {app.testers.map((tester, index) => (
-            <View key={index} className="h-20 overflow-hidden relative">
-              <View className="absolute bg-white/[0.04] border border-white/[0.08] rounded-xl h-20 flex-row items-center justify-between left-8 px-3 top-0 right-0">
-                <View className="flex-row items-center gap-3 flex-1">
-                  <Title4
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    className="flex-1"
-                  >
+            <View key={index} className="h-20 relative">
+              {/* Card background - ml-8 = 32px left offset for icon, flex-1 fills remaining space */}
+              <View className="absolute left-8 right-0 top-0 h-20 bg-white/[0.04] border border-white/[0.08] rounded-xl flex-row items-center justify-between px-3 gap-2.5">
+                {/* Email section - flex-1 takes available space */}
+                <View className="flex-1 min-w-0">
+                  <Title4 numberOfLines={1} ellipsizeMode="tail">
                     {tester.email}
                   </Title4>
                 </View>
+
+                {/* Status text */}
                 <ButtonText
-                  className="text-[10px] text-right ml-2"
+                  className="shrink-0"
                   style={{
                     color: getStatusColor(tester.completed, tester.dropped),
                   }}
@@ -149,17 +146,15 @@ export default function AppDetail() {
                   )}
                 </ButtonText>
               </View>
-              {/* Check Icon */}
+
+              {/* Check Icon Circle - w-4 h-4 = 16x16, top-8 = 32px (centered vertically in 80px container) */}
               <View
-                className="absolute left-0 overflow-hidden rounded-full size-4 top-8 items-center justify-center"
+                className="absolute left-0 top-8 w-4 h-4 rounded-full items-center justify-center"
                 style={{
-                  backgroundColor: getStatusColor(
-                    tester.completed,
-                    tester.dropped,
-                  ),
+                  backgroundColor: colors.gray[800],
                 }}
               >
-                <Check size={10} color="#F1F3F3" strokeWidth={3} />
+                <Check size={11} color={colors.main} strokeWidth={2} />
               </View>
             </View>
           ))}

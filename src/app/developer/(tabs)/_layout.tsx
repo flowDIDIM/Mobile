@@ -1,11 +1,21 @@
 import { Tabs } from "expo-router";
 import { LayoutGrid, User } from "lucide-react-native";
+import { colors } from "@/design-system";
 
 export default function DeveloperLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: "transparent",
+        },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
+          color: colors.main,
+        },
         tabBarStyle: {
           backgroundColor: "transparent",
           borderTopWidth: 0,
@@ -22,6 +32,7 @@ export default function DeveloperLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: "등록한 앱",
           tabBarIcon: ({ color, focused }) => (
             <LayoutGrid
               size={24}
@@ -35,6 +46,7 @@ export default function DeveloperLayout() {
       <Tabs.Screen
         name="my"
         options={{
+          title: "마이페이지",
           tabBarIcon: ({ color, focused }) => (
             <User
               size={24}
