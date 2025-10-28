@@ -2,7 +2,6 @@ import React from "react";
 import { View, ScrollView, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
 import { Title3 } from "@/components/Typography";
 import { authClient } from "@/lib/auth-client";
 
@@ -49,20 +48,12 @@ export default function TesterSettings() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          paddingTop: insets.top + 44,
+          paddingTop: 16,
           paddingBottom: insets.bottom + 40,
         }}
       >
-        {/* Top Navigation */}
-        <View className="h-13 items-center justify-center relative">
-          <Title3>정보 변경</Title3>
-          <Pressable className="absolute left-5" onPress={() => router.back()}>
-            <ChevronLeft size={24} color="#F1F3F3" strokeWidth={2} />
-          </Pressable>
-        </View>
-
         {/* Buttons */}
-        <View className="px-5 pt-6 gap-3">
+        <View className="px-5 gap-3">
           {/* Logout Button */}
           <Pressable
             className="bg-white/[0.08] rounded-lg items-center justify-center px-2.5 py-4"

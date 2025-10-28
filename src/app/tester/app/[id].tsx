@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { View, ScrollView, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, router } from "expo-router";
-import { ChevronLeft, Check, X } from "lucide-react-native";
+import { useLocalSearchParams } from "expo-router";
+import { Check, X } from "lucide-react-native";
 import {
   Title3,
   Title4,
@@ -110,23 +110,12 @@ export default function TesterAppDetail() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
-            paddingTop: insets.top + 44,
+            paddingTop: 16,
             paddingBottom: insets.bottom + 40,
           }}
         >
-          {/* Top Navigation */}
-          <View className="h-13 items-center justify-center relative">
-            <Title3>테스트 현황</Title3>
-            <Pressable
-              className="absolute left-5"
-              onPress={() => router.back()}
-            >
-              <ChevronLeft size={24} color="#F1F3F3" strokeWidth={2} />
-            </Pressable>
-          </View>
-
           {/* Status Section */}
-          <View className="items-center overflow-hidden px-5 mt-10">
+          <View className="items-center overflow-hidden px-5 mt-4">
             {/* Status Badge */}
             <View className="flex-row items-center justify-center gap-3 py-2">
               <Title3 className="text-primary text-center">
@@ -198,20 +187,12 @@ export default function TesterAppDetail() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          paddingTop: insets.top + 44,
+          paddingTop: 16,
           paddingBottom: insets.bottom + 100,
         }}
       >
-        {/* Top Navigation */}
-        <View className="h-13 items-center justify-center relative">
-          <Title3>앱 상세</Title3>
-          <Pressable className="absolute left-5" onPress={() => router.back()}>
-            <ChevronLeft size={24} color="#F1F3F3" strokeWidth={2} />
-          </Pressable>
-        </View>
-
         {/* App Icon */}
-        <View className="items-center pt-6">
+        <View className="items-center pt-2">
           <View className="size-[100px] rounded-[20px] overflow-hidden bg-gray-50">
             {app.icon && (
               <Image

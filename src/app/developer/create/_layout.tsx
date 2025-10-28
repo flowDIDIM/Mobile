@@ -1,4 +1,6 @@
 import { Stack } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { colors } from "@/design-system";
 
 export default function CreateLayout() {
   return (
@@ -10,11 +12,11 @@ export default function CreateLayout() {
         headerStyle: {
           backgroundColor: "transparent",
         },
-        headerTintColor: "#F1F3F3",
+        headerTintColor: colors.main,
         headerTitleStyle: {
           fontSize: 18,
           fontWeight: "600",
-          color: "#F1F3F3",
+          color: colors.main,
         },
         headerShadowVisible: false,
       }}

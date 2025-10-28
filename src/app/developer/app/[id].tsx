@@ -1,8 +1,8 @@
 import React from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, router } from "expo-router";
-import { ChevronLeft, Check } from "lucide-react-native";
+import { useLocalSearchParams } from "expo-router";
+import { Check } from "lucide-react-native";
 import { Title3, Title4, Headline1, ButtonText } from "@/components/Typography";
 import { colors } from "@/design-system";
 import { useHonoQuery } from "@/lib/hono-rpc";
@@ -69,23 +69,7 @@ export default function AppDetail() {
 
   return (
     <View className="flex-1">
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingTop: insets.top,
-        }}
-      >
-        {/* Top Navigation - h-13 = 52px */}
-        <View className="bg-gray-950 h-13 items-center justify-center relative px-5">
-          <Title3 className="text-center">테스트 현황</Title3>
-          <Pressable
-            className="absolute left-5 top-3.5"
-            onPress={() => router.back()}
-          >
-            <ChevronLeft size={24} color={colors.main} strokeWidth={2} />
-          </Pressable>
-        </View>
-
+      <ScrollView className="flex-1">
         {/* Notice Section - px-5 = 20px horizontal padding, mt-6 = 24px top margin */}
         <View className="px-5 mt-6">
           {/* Status Badge Row - py-2 = 8px */}

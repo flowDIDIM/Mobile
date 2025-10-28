@@ -1,8 +1,6 @@
 import React from "react";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
 import { Title3, Title4, Desc3, ButtonText } from "@/components/Typography";
 import { useHonoQuery } from "@/lib/hono-rpc";
 import { client } from "@/lib/api-client";
@@ -20,20 +18,12 @@ export default function PaymentHistory() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          paddingTop: insets.top + 44,
+          paddingTop: 16,
           paddingBottom: insets.bottom + 40,
         }}
       >
-        {/* Top Navigation */}
-        <View className="h-13 items-center justify-center relative">
-          <Title3>결제 내역</Title3>
-          <Pressable className="absolute left-5" onPress={() => router.back()}>
-            <ChevronLeft size={24} color="#F1F3F3" strokeWidth={2} />
-          </Pressable>
-        </View>
-
         {/* Payment List */}
-        <View className="px-7 pt-4 gap-3">
+        <View className="px-7 gap-3">
           {isLoading ? (
             <View className="items-center py-8">
               <Title3 className="text-sub">로딩 중...</Title3>
