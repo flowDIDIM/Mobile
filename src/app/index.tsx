@@ -3,14 +3,38 @@ import { StatusBar, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Body3, Title3 } from "@/components/Typography";
 import React, { useEffect } from "react";
+import { type Href, router, useGlobalSearchParams } from "expo-router";
 import {
-  type Href,
-  router,
-  useLocalSearchParams,
-  useGlobalSearchParams,
-} from "expo-router";
+  getAggregatedUsageStats,
+  getUsageStats,
+  hasUsageStatsPermission,
+  requestUsageStatsPermission,
+  UsageStatsIntervalType,
+} from "expo-android-usagestats";
 
 export default function Index() {
+  useEffect(() => {
+    (async () => {
+      const hasPermission = await hasUsageStatsPermission();
+      if (!hasPermission) {
+        await requestUsageStatsPermission();
+      } else {
+        const now = Date.now();
+        const yesterday = now - 24 * 60 * 60 * 1000;
+
+        const usageStats = await getUsageStats(yesterday, now);
+        console.log("Usage Stats:", usageStats);
+
+        const aggregatedStats = await getAggregatedUsageStats(
+          yesterday,
+          now,
+          UsageStatsIntervalType.INTERVAL_DAILY,
+        );
+        console.log("Aggregated Stats:", aggregatedStats);
+      }
+    })();
+  }, []);
+
   const insets = useSafeAreaInsets();
 
   const { path } = useGlobalSearchParams<{
