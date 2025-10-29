@@ -19,6 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: true,
   },
   android: {
+    googleServicesFile: "./google-services.json",
     package: "com.didim.android",
     adaptiveIcon: {
       backgroundColor: "#E6F4FE",
