@@ -51,6 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     "expo-web-browser",
+    "expo-notifications",
   ],
   experiments: {
     typedRoutes: true,
