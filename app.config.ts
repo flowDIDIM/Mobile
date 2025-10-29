@@ -10,6 +10,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "didim",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  extra: {
+    eas: {
+      projectId: "0132fec0-6cbf-45cc-ae7b-c5004c46e0e5",
+    },
+  },
   ios: {
     supportsTablet: true,
   },
