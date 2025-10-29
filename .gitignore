@@ -44,3 +44,4 @@ app-example
 
 .idea
 google-service-account-key.json
+credentials.json
