@@ -1,10 +1,6 @@
 import { NativeModule, requireNativeModule } from "expo";
 
-import { ExpoAndroidAlarmManagerModuleConstants } from "./ExpoAndroidAlarmManager.types";
-
 declare class ExpoAndroidAlarmManagerModule extends NativeModule {
-  SHARED_PREFS_NAME: string;
-  KEY_APP_LIST: string;
   registerAlarm(hour: number, minute: number): Promise<void>;
   cancelAlarm(): Promise<void>;
   testAlarm(): Promise<void>;
