@@ -1,26 +1,9 @@
 import { Stack } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "@/design-system";
+import { stackNavigationScreenOptions } from "@/design-system";
 
 export default function CreateLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: true,
-        headerTransparent: false,
-        contentStyle: { backgroundColor: "transparent" },
-        headerStyle: {
-          backgroundColor: "transparent",
-        },
-        headerTintColor: colors.main,
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: colors.main,
-        },
-        headerShadowVisible: false,
-      }}
-    >
+    <Stack screenOptions={stackNavigationScreenOptions}>
       <Stack.Screen
         name="package"
         options={{

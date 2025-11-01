@@ -1,25 +1,9 @@
 import { Stack } from "expo-router";
-import { colors } from "@/design-system";
+import { stackNavigationScreenOptions } from "@/design-system";
 
 export default function DeveloperLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: true,
-        headerTitleAlign: "center",
-        headerStyle: {
-          backgroundColor: "transparent",
-        },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: colors.main,
-        },
-        headerTintColor: colors.main,
-        headerShadowVisible: false,
-        contentStyle: { backgroundColor: "transparent" },
-      }}
-    >
+    <Stack screenOptions={stackNavigationScreenOptions}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="create" options={{ headerShown: false }} />
       <Stack.Screen name="settings" options={{ title: "정보 변경" }} />

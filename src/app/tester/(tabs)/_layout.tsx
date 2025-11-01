@@ -1,33 +1,10 @@
 import { Tabs } from "expo-router";
-import { Home, Search, Gift, User } from "lucide-react-native";
-import { colors } from "@/design-system";
+import { Gift, Home, Search, User } from "lucide-react-native";
+import { bottomTabScreenOptions } from "@/design-system";
 
 export default function TesterTabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        headerTitleAlign: "center",
-        headerStyle: {
-          backgroundColor: "transparent",
-        },
-        headerShadowVisible: false,
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: colors.main,
-        },
-        tabBarStyle: {
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          elevation: 0,
-        },
-        tabBarActiveTintColor: colors.gray["50"],
-        tabBarInactiveTintColor: colors.sub,
-        tabBarShowLabel: false,
-        sceneStyle: { backgroundColor: "transparent" },
-      }}
-    >
+    <Tabs screenOptions={bottomTabScreenOptions}>
       <Tabs.Screen
         name="index"
         options={{
