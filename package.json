@@ -4,11 +4,12 @@
   "version": "1.0.0",
   "scripts": {
     "reset-project": "node ./scripts/reset-project.js",
-    "run:android": "expo run:android",
     "build:android:preview": "eas build --platform android --profile preview --local",
     "build:android:production": "eas build --platform android --profile production --local",
     "lint": "expo lint",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@better-auth/expo": "^1.3.27",

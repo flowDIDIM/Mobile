@@ -4,35 +4,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Body3, Title3 } from "@/components/Typography";
 import React, { useEffect } from "react";
 import { type Href, router, useGlobalSearchParams } from "expo-router";
-import {
-  getAggregatedUsageStats,
-  getUsageStats,
-  hasUsageStatsPermission,
-  requestUsageStatsPermission,
-  UsageStatsIntervalType,
-} from "expo-android-usagestats";
+
+import ExpoAndroidAlarmManagerModule from "expo-android-alarm-manager";
 
 export default function Index() {
-  useEffect(() => {
-    (async () => {
-      const hasPermission = await hasUsageStatsPermission();
-      if (!hasPermission) {
-        await requestUsageStatsPermission();
-      } else {
-        const now = Date.now();
-        const yesterday = now - 24 * 60 * 60 * 1000;
-
-        const usageStats = await getUsageStats(yesterday, now);
-
-        const aggregatedStats = await getAggregatedUsageStats(
-          yesterday,
-          now,
-          UsageStatsIntervalType.INTERVAL_DAILY,
-        );
-      }
-    })();
-  }, []);
-
   const insets = useSafeAreaInsets();
 
   const { path } = useGlobalSearchParams<{
@@ -86,6 +61,9 @@ export default function Index() {
           역할을 선택해주세요
         </Body3>
 
+        <Title3>
+          ExpoAndroidAlarmManagerModule: {ExpoAndroidAlarmManagerModule.hello()}
+        </Title3>
         <TouchableOpacity
           className="bg-secondary rounded-lg px-6 py-4 w-full max-w-xs"
           activeOpacity={0.8}

@@ -10,6 +10,7 @@ module.exports = defineConfig([
     ignores: ["dist/*"],
     rules: {
       "import/extensions": "off",
+      "import/no-unresolved": "off",
     },
   },
 ]);
