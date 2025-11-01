@@ -23,14 +23,12 @@ export default function Index() {
         const yesterday = now - 24 * 60 * 60 * 1000;
 
         const usageStats = await getUsageStats(yesterday, now);
-        console.log("Usage Stats:", usageStats);
 
         const aggregatedStats = await getAggregatedUsageStats(
           yesterday,
           now,
           UsageStatsIntervalType.INTERVAL_DAILY,
         );
-        console.log("Aggregated Stats:", aggregatedStats);
       }
     })();
   }, []);

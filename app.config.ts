@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "DIDIM",
   slug: "DIDIM",
-  version: "1.0.0",
+  version: "0.0.1",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: "didim",
@@ -17,6 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: {
     supportsTablet: true,
+    bundleIdentifier: "com.didim.ios",
   },
   android: {
     googleServicesFile: "./google-services.json",
@@ -52,6 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-web-browser",
     "expo-notifications",
+    "expo-dev-client",
   ],
   experiments: {
     typedRoutes: true,
