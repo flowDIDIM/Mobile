@@ -8,6 +8,8 @@ export const env = createEnv({
     EXPO_PUBLIC_API_URL: z.url().min(1, "API URL is required"),
   },
 
-  runtimeEnv: process.env,
+  runtimeEnvStrict: {
+    EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
+  },
   emptyStringAsUndefined: true,
 });
