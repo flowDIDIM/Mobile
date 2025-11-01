@@ -1,50 +1,86 @@
 package expo.modules.androidalarmmanager
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import java.util.Calendar
 
 class ExpoAndroidAlarmManagerModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
+  companion object {
+    const val ALARM_REQUEST_CODE = 1000
+    const val SHARED_PREFS_NAME = "ExpoAndroidAlarmManager"
+    const val KEY_APP_LIST = "didim_app_list"
+  }
+
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoAndroidAlarmManager')` in JavaScript.
     Name("ExpoAndroidAlarmManager")
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
-    }
+    // JS 레이어와 SharedPreferences를 공유하기 위한 상수
+    Constants(
+      "SHARED_PREFS_NAME" to SHARED_PREFS_NAME,
+      "KEY_APP_LIST" to KEY_APP_LIST
+    )
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    AsyncFunction("registerAlarm") { hour: Int, minute: Int ->
+      val context = appContext.reactContext ?: throw Exception("React context is null")
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ExpoAndroidAlarmManagerView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: ExpoAndroidAlarmManagerView, url: URL ->
-        view.webView.loadUrl(url.toString())
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (!alarmManager.canScheduleExactAlarms()) {
+          throw Exception("Cannot schedule exact alarms. Please grant SCHEDULE_EXACT_ALARM permission.")
+        }
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+
+      val intent = Intent(context, NotificationReceiver::class.java)
+      val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        ALARM_REQUEST_CODE,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+      )
+
+      val calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+
+        // 오늘 이미 지난 시간이면 내일로 스케줄링
+        if (timeInMillis <= System.currentTimeMillis()) {
+          add(Calendar.DAY_OF_MONTH, 1)
+        }
+      }
+
+      val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+      alarmManager.setRepeating(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        AlarmManager.INTERVAL_DAY,
+        pendingIntent
+      )
+    }
+
+    AsyncFunction("cancelAlarm") {
+      val context = appContext.reactContext ?: throw Exception("React context is null")
+
+      // registerAlarm과 동일한 intent로 PendingIntent를 찾아야 취소 가능
+      val intent = Intent(context, NotificationReceiver::class.java)
+      val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        ALARM_REQUEST_CODE,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+      )
+
+      if (pendingIntent != null) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
+      }
     }
   }
 }

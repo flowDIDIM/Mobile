@@ -1,11 +1,12 @@
 import { NativeModule, requireNativeModule } from "expo";
 
-import { ExpoAndroidAlarmManagerModuleEvents } from "./ExpoAndroidAlarmManager.types";
+import { ExpoAndroidAlarmManagerModuleConstants } from "./ExpoAndroidAlarmManager.types";
 
-declare class ExpoAndroidAlarmManagerModule extends NativeModule<ExpoAndroidAlarmManagerModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+declare class ExpoAndroidAlarmManagerModule extends NativeModule {
+  SHARED_PREFS_NAME: string;
+  KEY_APP_LIST: string;
+  registerAlarm(hour: number, minute: number): Promise<void>;
+  cancelAlarm(): Promise<void>;
 }
 
 // This call loads the native module object from the JSI.

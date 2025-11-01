@@ -30,7 +30,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
-    permissions: ["INTERNET"],
+    permissions: [
+      "INTERNET",
+      "POST_NOTIFICATIONS",
+      "SCHEDULE_EXACT_ALARM",
+      "USE_EXACT_ALARM",
+      "PACKAGE_USAGE_STATS",
+    ],
   },
   web: {
     bundler: "metro",
