@@ -16,5 +16,9 @@ public class ExpoAndroidAlarmManagerModule: Module {
     AsyncFunction("cancelAlarm") {
       throw Exception(name: "UnsupportedPlatform", description: "Alarm manager is only supported on Android")
     }
+
+    AsyncFunction("testAlarm") {
+      throw Exception(name: "UnsupportedPlatform", description: "Alarm manager is only supported on Android")
+    }
   }
 }

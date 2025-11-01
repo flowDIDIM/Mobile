@@ -74,5 +74,10 @@ class ExpoAndroidAlarmManagerModule : Module() {
         pendingIntent.cancel()
       }
     }
+
+    AsyncFunction("testAlarm") {
+      val context = appContext.reactContext ?: throw Exception("React context is null")
+      NotificationHelper.checkAndSendNotification(context)
+    }
   }
 }

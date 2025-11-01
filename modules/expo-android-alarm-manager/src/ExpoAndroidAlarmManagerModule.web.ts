@@ -11,6 +11,10 @@ class ExpoAndroidAlarmManagerModule extends NativeModule {
   async cancelAlarm(): Promise<void> {
     console.warn("Alarm manager is not supported on web");
   }
+
+  async testAlarm(): Promise<void> {
+    console.warn("Alarm manager is not supported on web");
+  }
 }
 
 export default registerWebModule(

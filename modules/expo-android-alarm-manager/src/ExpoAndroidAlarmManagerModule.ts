@@ -7,6 +7,7 @@ declare class ExpoAndroidAlarmManagerModule extends NativeModule {
   KEY_APP_LIST: string;
   registerAlarm(hour: number, minute: number): Promise<void>;
   cancelAlarm(): Promise<void>;
+  testAlarm(): Promise<void>;
 }
 
 // This call loads the native module object from the JSI.
