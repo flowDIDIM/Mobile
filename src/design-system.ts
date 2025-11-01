@@ -45,6 +45,7 @@ export const stackNavigationScreenOptions: NativeStackNavigationOptions = {
     fontWeight: "600",
     color: colors.main,
   },
+  headerTintColor: colors.main,
 
   // Make background transparent(to show gradient)
   contentStyle: { backgroundColor: "transparent" },
