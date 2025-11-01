@@ -23,9 +23,9 @@ export default function DeveloperLayout() {
           height: 80,
           paddingBottom: 16,
         },
+        tabBarActiveTintColor: colors.gray["50"],
+        tabBarInactiveTintColor: colors.sub,
         tabBarShowLabel: false,
-        tabBarActiveTintColor: "#F1F3F3",
-        tabBarInactiveTintColor: "#919DA1",
         sceneStyle: { backgroundColor: "transparent" },
       }}
     >

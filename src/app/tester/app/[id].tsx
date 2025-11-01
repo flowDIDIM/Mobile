@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, ScrollView, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import {
   Title3,

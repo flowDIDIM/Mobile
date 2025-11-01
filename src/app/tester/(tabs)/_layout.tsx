@@ -11,15 +11,16 @@ export default function TesterTabsLayout() {
         headerStyle: {
           backgroundColor: "transparent",
         },
+        headerShadowVisible: false,
         headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
           color: colors.main,
         },
         tabBarStyle: {
           backgroundColor: "transparent",
           borderTopWidth: 0,
-          position: "absolute",
           elevation: 0,
-          height: 80,
         },
         tabBarActiveTintColor: colors.gray["50"],
         tabBarInactiveTintColor: colors.sub,
