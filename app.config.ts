@@ -1,4 +1,5 @@
 import { ExpoConfig, ConfigContext } from "expo/config";
+import "tsx/cjs";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -60,6 +61,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-web-browser",
     "expo-notifications",
     "expo-dev-client",
+    ["./src/plugins/withAndroidPlugin.ts"],
   ],
   experiments: {
     typedRoutes: true,
