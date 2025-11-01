@@ -11,8 +11,6 @@ import java.util.Calendar
 class ExpoAndroidAlarmManagerModule : Module() {
   companion object {
     const val ALARM_REQUEST_CODE = 1000
-    const val SHARED_PREFS_NAME = "ExpoAndroidAlarmManager"
-    const val KEY_APP_LIST = "didim_app_list"
   }
 
   override fun definition() = ModuleDefinition {
@@ -20,8 +18,8 @@ class ExpoAndroidAlarmManagerModule : Module() {
 
     // JS 레이어와 SharedPreferences를 공유하기 위한 상수
     Constants(
-      "SHARED_PREFS_NAME" to SHARED_PREFS_NAME,
-      "KEY_APP_LIST" to KEY_APP_LIST
+      "SHARED_PREFS_NAME" to AppTestingManager.SHARED_PREFS_NAME,
+      "KEY_APP_LIST" to AppTestingManager.KEY_APP_LIST
     )
 
     AsyncFunction("registerAlarm") { hour: Int, minute: Int ->
@@ -78,6 +76,16 @@ class ExpoAndroidAlarmManagerModule : Module() {
     AsyncFunction("testAlarm") {
       val context = appContext.reactContext ?: throw Exception("React context is null")
       NotificationHelper.checkAndSendNotification(context)
+    }
+
+    AsyncFunction("getAppList") {
+      val context = appContext.reactContext ?: throw Exception("React context is null")
+      AppTestingManager.getRegisteredApps(context)
+    }
+
+    AsyncFunction("setAppList") { apps: List<String> ->
+      val context = appContext.reactContext ?: throw Exception("React context is null")
+      AppTestingManager.setRegisteredApps(context, apps)
     }
   }
 }
