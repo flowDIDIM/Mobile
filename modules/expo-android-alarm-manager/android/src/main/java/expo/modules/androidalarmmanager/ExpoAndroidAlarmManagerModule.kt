@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import java.util.Calendar
@@ -28,13 +27,6 @@ class ExpoAndroidAlarmManagerModule : Module() {
     AsyncFunction("registerAlarm") { hour: Int, minute: Int ->
       val context = appContext.reactContext ?: throw Exception("React context is null")
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (!alarmManager.canScheduleExactAlarms()) {
-          throw Exception("Cannot schedule exact alarms. Please grant SCHEDULE_EXACT_ALARM permission.")
-        }
-      }
-
       val intent = Intent(context, NotificationReceiver::class.java)
       val pendingIntent = PendingIntent.getBroadcast(
         context,
@@ -56,7 +48,7 @@ class ExpoAndroidAlarmManagerModule : Module() {
       }
 
       val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-      alarmManager.setRepeating(
+      alarmManager.setInexactRepeating(
         AlarmManager.RTC_WAKEUP,
         calendar.timeInMillis,
         AlarmManager.INTERVAL_DAY,

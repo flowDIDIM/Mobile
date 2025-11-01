@@ -33,9 +33,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     predictiveBackGestureEnabled: false,
     permissions: [
       "INTERNET",
+      "RECEIVE_BOOT_COMPLETED",
       "POST_NOTIFICATIONS",
-      "SCHEDULE_EXACT_ALARM",
-      "USE_EXACT_ALARM",
       "PACKAGE_USAGE_STATS",
     ],
   },

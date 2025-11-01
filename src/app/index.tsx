@@ -5,8 +5,6 @@ import { Body3, Title3 } from "@/components/Typography";
 import React, { useEffect } from "react";
 import { type Href, router, useGlobalSearchParams } from "expo-router";
 
-import ExpoAndroidAlarmManagerModule from "expo-android-alarm-manager";
-
 export default function Index() {
   const insets = useSafeAreaInsets();
 
@@ -61,9 +59,6 @@ export default function Index() {
           역할을 선택해주세요
         </Body3>
 
-        <Title3>
-          ExpoAndroidAlarmManagerModule: {ExpoAndroidAlarmManagerModule.hello()}
-        </Title3>
         <TouchableOpacity
           className="bg-secondary rounded-lg px-6 py-4 w-full max-w-xs"
           activeOpacity={0.8}
